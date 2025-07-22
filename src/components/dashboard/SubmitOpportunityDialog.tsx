@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Opportunity, OpportunityType, Emirate } from '@/lib/types';
 import { useEffect, useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { CalendarIcon, Check, ChevronsUpDown } from 'lucide-react';
+import { CalendarIcon, Check, ChevronsUpDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format as formatDate } from 'date-fns';
 import { Calendar } from '../ui/calendar';
@@ -186,66 +186,81 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                 </Popover><FormMessage /></FormItem>
               )}
             />
-            <FormField control={form.control} name="grades" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Grades</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button variant="outline" role="combobox" className={cn("w-full justify-between h-auto", !field.value?.length && "text-muted-foreground")}>
-                        <div className="flex gap-1 flex-wrap">
-                          {field.value?.length > 0 ? (
-                             field.value.length === gradeOptions.length ? "All Grades" :
-                             field.value.sort((a,b) => a - b).map((grade) => (
-                              <Badge variant="secondary" key={grade}>
-                                Grade {grade}
-                              </Badge>
-                            ))
-                          ) : (
-                            "Select grades"
-                          )}
-                        </div>
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                    <Command>
-                      <CommandInput placeholder="Search grades..." />
-                      <CommandEmpty>No grades found.</CommandEmpty>
-                      <CommandList>
-                        <CommandGroup>
-                           <CommandItem
-                            onSelect={() => {
-                              form.setValue("grades", field.value?.length === gradeOptions.length ? [] : gradeOptions.map(o => o.value))
-                            }}
-                          >
-                            <Check className={cn("mr-2 h-4 w-4", field.value?.length === gradeOptions.length ? "opacity-100" : "opacity-0")} />
-                            All Grades
-                          </CommandItem>
-                          {gradeOptions.map((option) => (
-                            <CommandItem
-                              key={option.value}
-                              onSelect={() => {
-                                const selectedGrades = field.value || [];
-                                const newGrades = selectedGrades.includes(option.value)
-                                  ? selectedGrades.filter((g) => g !== option.value)
-                                  : [...selectedGrades, option.value];
-                                form.setValue("grades", newGrades.sort((a,b) => a-b));
-                              }}
-                            >
-                              <Check className={cn("mr-2 h-4 w-4", field.value?.includes(option.value) ? "opacity-100" : "opacity-0")} />
-                              {option.label}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
+             <FormField
+                control={form.control}
+                name="grades"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Grades</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <div className="flex flex-wrap gap-2 p-2 border rounded-md min-h-10">
+                            {field.value.length > 0 ? (
+                              field.value.sort((a,b) => a-b).map((grade) => (
+                                <Badge variant="secondary" key={grade} className="flex items-center gap-1">
+                                  Grade {grade}
+                                  <button
+                                    type="button"
+                                    className="rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      const newGrades = field.value.filter((g) => g !== grade);
+                                      form.setValue("grades", newGrades);
+                                    }}
+                                  >
+                                    <X className="h-3 w-3" />
+                                    <span className="sr-only">Remove grade {grade}</span>
+                                  </button>
+                                </Badge>
+                              ))
+                            ) : (
+                              <span className="text-sm text-muted-foreground px-1 py-0.5">Select grades...</span>
+                            )}
+                             <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
+                          </div>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                        <Command>
+                          <CommandInput placeholder="Search grades..." />
+                          <CommandEmpty>No grades found.</CommandEmpty>
+                          <CommandList>
+                            <CommandGroup>
+                               <CommandItem
+                                onSelect={() => {
+                                  const allGrades = gradeOptions.map(o => o.value);
+                                  const currentGrades = field.value || [];
+                                  const allSelected = allGrades.every(g => currentGrades.includes(g));
+                                  form.setValue("grades", allSelected ? [] : allGrades)
+                                }}
+                              >
+                                <Check className={cn("mr-2 h-4 w-4", field.value?.length === gradeOptions.length ? "opacity-100" : "opacity-0")} />
+                                All Grades
+                              </CommandItem>
+                              {gradeOptions.map((option) => (
+                                <CommandItem
+                                  key={option.value}
+                                  onSelect={() => {
+                                    const selectedGrades = field.value || [];
+                                    const newGrades = selectedGrades.includes(option.value)
+                                      ? selectedGrades.filter((g) => g !== option.value)
+                                      : [...selectedGrades, option.value];
+                                    form.setValue("grades", newGrades.sort((a,b) => a-b));
+                                  }}
+                                >
+                                  <Check className={cn("mr-2 h-4 w-4", field.value?.includes(option.value) ? "opacity-100" : "opacity-0")} />
+                                  {option.label}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
             />
             <div className="grid grid-cols-2 gap-4">
                 <FormField control={form.control} name="price" render={({ field }) => (
