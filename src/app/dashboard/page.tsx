@@ -9,6 +9,7 @@ import { SubmitOpportunityDialog } from '@/components/dashboard/SubmitOpportunit
 import { useAuth } from '@/contexts/AuthContext';
 import { Opportunity } from '@/lib/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { addDays, addMonths, endOfWeek } from 'date-fns';
 
 export default function DashboardPage() {
   const { opportunities } = useOpportunities();
@@ -36,7 +37,20 @@ export default function DashboardPage() {
         const formatMatch = filters.format === 'all' || opp.format === filters.format;
         const ageMatch = filters.age >= opp.ageRange[0] && filters.age <= opp.ageRange[1];
         
-        return searchMatch && typeMatch && subjectMatch && priceMatch && audienceMatch && formatMatch && ageMatch;
+        const deadlineDate = new Date(opp.deadline);
+        const now = new Date();
+        let deadlineMatch = true;
+        if (filters.deadline === 'week') {
+            const endOfWeekDate = endOfWeek(now, { weekStartsOn: 1 });
+            deadlineMatch = deadlineDate >= now && deadlineDate <= endOfWeekDate;
+        } else if (filters.deadline === 'month') {
+            const endOfMonthDate = addMonths(now, 1);
+            endOfMonthDate.setDate(1); 
+            endOfMonthDate.setDate(endOfMonthDate.getDate() - 1);
+            deadlineMatch = deadlineDate >= now && deadlineDate <= endOfMonthDate;
+        }
+
+        return searchMatch && typeMatch && subjectMatch && priceMatch && audienceMatch && formatMatch && ageMatch && deadlineMatch;
       });
   }, [opportunities, filters]);
 

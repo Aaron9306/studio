@@ -163,6 +163,25 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
             </RadioGroup>
           </div>
           <Separator />
+           {/* Deadline */}
+          <div>
+            <Label>Deadline</Label>
+            <RadioGroup value={filters.deadline} onValueChange={value => setFilters(prev => ({...prev, deadline: value}))} className="mt-2 space-y-1">
+                <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="all" id="deadline-all" />
+                    <Label htmlFor="deadline-all" className="font-normal">Anytime</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="week" id="deadline-week" />
+                    <Label htmlFor="deadline-week" className="font-normal">Closing this week</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="month" id="deadline-month" />
+                    <Label htmlFor="deadline-month" className="font-normal">Closing this month</Label>
+                </div>
+            </RadioGroup>
+          </div>
+          <Separator />
           {/* Age */}
           <div>
             <Label htmlFor="age">Age (up to {filters.age})</Label>
