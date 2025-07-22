@@ -58,15 +58,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
-      if (userDoc.exists() && userDoc.data().role === 'student') {
+      if (userDoc.exists() && userDoc.data().role !== 'admin') {
         router.push('/dashboard');
         return true;
       }
-      // If role is not student, sign out
+      // If role is admin or user doc doesn't exist, sign out
       await signOut(auth);
-      toast({ variant: 'destructive', title: 'Login Failed', description: 'No student account found.' });
+      toast({ variant: 'destructive', title: 'Login Failed', description: 'No student account found for this email.' });
       return false;
     } catch (error) {
+      // This will catch wrong password, user not found etc.
       return false;
     }
   };
@@ -79,10 +80,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         router.push('/admin/dashboard');
         return true;
       }
+      // If role is not admin or user doc does not exist, sign them out.
        await signOut(auth);
-       toast({ variant: 'destructive', title: 'Login Failed', description: 'You are not an administrator.' });
+       toast({ variant: 'destructive', title: 'Access Denied', description: 'You do not have administrator privileges.' });
       return false;
     } catch (error) {
+      // This will catch invalid credentials (wrong email/password)
       return false;
     }
   };
@@ -102,17 +105,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return true;
     } catch (error: any) {
       if (error.code === 'auth/email-already-in-use') {
+         toast({
+          variant: 'destructive',
+          title: 'Signup Failed',
+          description: 'An account with this email already exists.',
+        });
+        // Return false here to indicate the specific error to the form
         return false;
       }
-      // For any other error, we should probably let the user know something went wrong
-      // without assuming it's a duplicate email.
+      // For any other error, show a generic message
       toast({
         variant: 'destructive',
         title: 'Signup Failed',
-        description: error.message || 'An unexpected error occurred. Please try again.',
+        description: 'An unexpected error occurred. Please try again.',
       });
-      // We return false, but the page doesn't use this for other errors.
-      // This is still better than misinforming the user.
+      // Throw the error so it can be caught by the calling function if needed, but not for form state
       throw error;
     }
   };
@@ -130,7 +137,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       await updateDoc(userDocRef, {
-        bookmarkedOpportunities: isBookomed 
+        bookmarkedOpportunities: isBookmarked 
           ? arrayRemove(opportunityId) 
           : arrayUnion(opportunityId)
       });
