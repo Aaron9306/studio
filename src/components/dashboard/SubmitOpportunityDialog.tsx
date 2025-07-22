@@ -22,7 +22,7 @@ import { Calendar } from '../ui/calendar';
 import { Label } from '../ui/label';
 import { Timestamp } from 'firebase/firestore';
 import { Slider } from '../ui/slider';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '../ui/command';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
 import { Badge } from '../ui/badge';
 
 const gradeOptions = Array.from({ length: 12 }, (_, i) => ({
@@ -36,7 +36,7 @@ const opportunitySchema = z.object({
   description: z.string().min(20, 'Description must be at least 20 characters.'),
   subject: z.string().min(2, 'Subject is required.'),
   ageRange: z.tuple([z.number().min(1), z.number().max(30)]).refine(data => data[0] <= data[1], { message: "Minimum age cannot be greater than maximum age."}),
-  grades: z.array(z.number()).min(1, 'Please select at least one grade.'),
+  grades: z.array(z.number()),
   price: z.enum(['Free', 'Paid']),
   audience: z.enum(['All Nationalities', 'Emiratis Only']),
   format: z.enum(['Online', 'Offline']),
@@ -213,7 +213,8 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                       <Button variant="outline" role="combobox" className={cn("w-full justify-between h-auto", !field.value?.length && "text-muted-foreground")}>
                         <div className="flex gap-1 flex-wrap">
                           {field.value?.length > 0 ? (
-                            field.value.map((grade) => (
+                             field.value.length === gradeOptions.length ? "All Grades" :
+                             field.value.sort((a,b) => a - b).map((grade) => (
                               <Badge variant="secondary" key={grade}>
                                 Grade {grade}
                               </Badge>
@@ -230,23 +231,33 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                     <Command>
                       <CommandInput placeholder="Search grades..." />
                       <CommandEmpty>No grades found.</CommandEmpty>
-                      <CommandGroup>
-                        {gradeOptions.map((option) => (
-                          <CommandItem
-                            key={option.value}
+                      <CommandList>
+                        <CommandGroup>
+                           <CommandItem
                             onSelect={() => {
-                              const selectedGrades = field.value || [];
-                              const newGrades = selectedGrades.includes(option.value)
-                                ? selectedGrades.filter((g) => g !== option.value)
-                                : [...selectedGrades, option.value];
-                              field.onChange(newGrades.sort((a,b) => a-b));
+                              field.onChange(field.value?.length === gradeOptions.length ? [] : gradeOptions.map(o => o.value))
                             }}
                           >
-                            <Check className={cn("mr-2 h-4 w-4", field.value?.includes(option.value) ? "opacity-100" : "opacity-0")} />
-                            {option.label}
+                            <Check className={cn("mr-2 h-4 w-4", field.value?.length === gradeOptions.length ? "opacity-100" : "opacity-0")} />
+                            All Grades
                           </CommandItem>
-                        ))}
-                      </CommandGroup>
+                          {gradeOptions.map((option) => (
+                            <CommandItem
+                              key={option.value}
+                              onSelect={() => {
+                                const selectedGrades = field.value || [];
+                                const newGrades = selectedGrades.includes(option.value)
+                                  ? selectedGrades.filter((g) => g !== option.value)
+                                  : [...selectedGrades, option.value];
+                                field.onChange(newGrades.sort((a,b) => a-b));
+                              }}
+                            >
+                              <Check className={cn("mr-2 h-4 w-4", field.value?.includes(option.value) ? "opacity-100" : "opacity-0")} />
+                              {option.label}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
                     </Command>
                   </PopoverContent>
                 </Popover>
