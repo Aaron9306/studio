@@ -36,7 +36,7 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
       </CardHeader>
       <CardContent className="p-6 flex-grow">
         <CardTitle className="font-headline text-xl mb-2 line-clamp-2">{opportunity.title}</CardTitle>
-        <p className="text-muted-foreground line-clamp-3 text-sm">{opportunity.description}</p>
+        <p className="text-muted-foreground line-clamp-3 text-sm">{opportunity.summary || opportunity.description}</p>
       </CardContent>
       <CardFooter className="p-6 bg-secondary/50 flex justify-between items-center">
         <Link href={`/opportunity/${opportunity.id}`} passHref>

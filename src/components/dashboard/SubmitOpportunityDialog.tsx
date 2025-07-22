@@ -15,13 +15,20 @@ import { useToast } from '@/hooks/use-toast';
 import { Opportunity, OpportunityType, Emirate } from '@/lib/types';
 import { useEffect, useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format as formatDate } from 'date-fns';
 import { Calendar } from '../ui/calendar';
 import { Label } from '../ui/label';
 import { Timestamp } from 'firebase/firestore';
 import { Slider } from '../ui/slider';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '../ui/command';
+import { Badge } from '../ui/badge';
+
+const gradeOptions = Array.from({ length: 12 }, (_, i) => ({
+  value: i + 1,
+  label: `Grade ${i + 1}`,
+}));
 
 const opportunitySchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.'),
@@ -29,6 +36,7 @@ const opportunitySchema = z.object({
   description: z.string().min(20, 'Description must be at least 20 characters.'),
   subject: z.string().min(2, 'Subject is required.'),
   ageRange: z.tuple([z.number().min(1), z.number().max(30)]).refine(data => data[0] <= data[1], { message: "Minimum age cannot be greater than maximum age."}),
+  grades: z.array(z.number()).min(1, 'Please select at least one grade.'),
   price: z.enum(['Free', 'Paid']),
   audience: z.enum(['All Nationalities', 'Emiratis Only']),
   format: z.enum(['Online', 'Offline']),
@@ -40,7 +48,7 @@ const opportunitySchema = z.object({
 
 const opportunityTypes: OpportunityType[] = ['MUN', 'Internship', 'Volunteering', 'Competition', 'Summer Camp', 'Hackathon', 'Workshop'];
 const subjects = ['Technology', 'Business', 'Arts & Culture', 'Science', 'Politics', 'Social Work', 'Engineering', 'Health & Medicine', 'Environment'];
-const emirates: Emirate[] = ["Abu Dhabi", "Ajman", "Dubai", "Fujairah", "Ras Al Khaimah", "Sharjah", "Umm Al Quwain", "All Emirates"];
+const emirates: (Emirate | "All Emirates")[] = ["Abu Dhabi", "Ajman", "Dubai", "Fujairah", "Ras Al Khaimah", "Sharjah", "Umm Al Quwain", "All Emirates"];
 
 
 interface SubmitOpportunityDialogProps {
@@ -63,6 +71,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
       description: '',
       subject: '',
       ageRange: [16, 25],
+      grades: [],
       price: 'Free',
       audience: 'All Nationalities',
       format: 'Offline',
@@ -78,6 +87,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
       form.reset({
         ...opportunityToEdit,
         deadline: opportunityToEdit.deadline.toDate(),
+        grades: opportunityToEdit.grades || [],
       });
     } else {
         form.reset({
@@ -86,6 +96,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
             description: '',
             subject: '',
             ageRange: [16, 25],
+            grades: [],
             price: 'Free',
             audience: 'All Nationalities',
             format: 'Offline',
@@ -122,6 +133,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
       setOpen(false);
       onSuccess?.();
     } catch(e) {
+        console.error(e)
         toast({ variant: 'destructive', title: 'Submission failed', description: 'Could not save the opportunity. Please try again.'})
     }
   };
@@ -192,6 +204,56 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                     <FormMessage />
                 </FormItem>
             )}/>
+            <FormField control={form.control} name="grades" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Grades</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button variant="outline" role="combobox" className={cn("w-full justify-between h-auto", !field.value?.length && "text-muted-foreground")}>
+                        <div className="flex gap-1 flex-wrap">
+                          {field.value?.length > 0 ? (
+                            field.value.map((grade) => (
+                              <Badge variant="secondary" key={grade}>
+                                Grade {grade}
+                              </Badge>
+                            ))
+                          ) : (
+                            "Select grades"
+                          )}
+                        </div>
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                    <Command>
+                      <CommandInput placeholder="Search grades..." />
+                      <CommandEmpty>No grades found.</CommandEmpty>
+                      <CommandGroup>
+                        {gradeOptions.map((option) => (
+                          <CommandItem
+                            key={option.value}
+                            onSelect={() => {
+                              const selectedGrades = field.value || [];
+                              const newGrades = selectedGrades.includes(option.value)
+                                ? selectedGrades.filter((g) => g !== option.value)
+                                : [...selectedGrades, option.value];
+                              field.onChange(newGrades.sort((a,b) => a-b));
+                            }}
+                          >
+                            <Check className={cn("mr-2 h-4 w-4", field.value?.includes(option.value) ? "opacity-100" : "opacity-0")} />
+                            {option.label}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+            />
             <div className="grid grid-cols-2 gap-4">
                 <FormField control={form.control} name="price" render={({ field }) => (
                     <FormItem><FormLabel>Price</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex space-x-4 pt-2">

@@ -13,8 +13,10 @@ export interface Opportunity {
   title: string;
   type: OpportunityType;
   description: string;
+  summary?: string;
   subject: string;
   ageRange: [number, number];
+  grades: number[];
   price: OpportunityPrice;
   audience: OpportunityAudience;
   format: OpportunityFormat;

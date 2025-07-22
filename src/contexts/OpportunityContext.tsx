@@ -14,13 +14,14 @@ import {
   orderBy
 } from 'firebase/firestore';
 import { useAuth } from './AuthContext';
+import { summarizeDescription } from '@/ai/flows/summarize-flow';
 
 interface OpportunityContextType {
   opportunities: Opportunity[];
   getOpportunityById: (id: string) => Opportunity | undefined;
-  addOpportunity: (opportunity: Omit<Opportunity, 'id' | 'status' | 'createdAt'>) => Promise<void>;
+  addOpportunity: (opportunity: Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'summary'>) => Promise<void>;
   updateOpportunityStatus: (id: string, status: OpportunityStatus) => Promise<void>;
-  updateOpportunity: (id: string, updatedOpportunity: Partial<Omit<Opportunity, 'id' | 'status' | 'createdAt'>>) => Promise<void>;
+  updateOpportunity: (id: string, updatedOpportunity: Partial<Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'summary'>>) => Promise<void>;
   deleteOpportunity: (id: string) => Promise<void>;
   loading: boolean;
 }
@@ -52,20 +53,28 @@ export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
     return opportunities.find(opp => opp.id === id);
   };
 
-  const addOpportunity = async (opportunityData: Omit<Opportunity, 'id' | 'status'| 'createdAt'>) => {
+  const addOpportunity = async (opportunityData: Omit<Opportunity, 'id' | 'status'| 'createdAt' | 'summary'>) => {
     if (!user) throw new Error("User not authenticated");
+    const summary = await summarizeDescription({description: opportunityData.description});
     await addDoc(collection(db, 'opportunities'), {
       ...opportunityData,
+      summary,
       status: 'pending',
       submittedBy: user.id,
       createdAt: serverTimestamp()
     });
   };
   
-  const updateOpportunity = async (id: string, updatedData: Partial<Omit<Opportunity, 'id' | 'status' | 'createdAt'>>) => {
+  const updateOpportunity = async (id: string, updatedData: Partial<Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'summary'>>) => {
     const oppDocRef = doc(db, 'opportunities', id);
+    let summary;
+    if (updatedData.description) {
+      summary = await summarizeDescription({description: updatedData.description});
+    }
+
     await updateDoc(oppDocRef, {
         ...updatedData,
+        ...(summary && { summary }),
         status: 'pending'
     });
   };

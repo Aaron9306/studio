@@ -7,7 +7,7 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Bookmark, Calendar, Globe, Tag, Users, Wallet, Clock, User, ExternalLink, Edit } from "lucide-react";
+import { Bookmark, Calendar, Globe, Tag, Users, Wallet, Clock, User, ExternalLink, Edit, BookCopy } from "lucide-react";
 import { format as formatDate } from 'date-fns';
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -79,6 +79,9 @@ export default function OpportunityDetailPage() {
     { icon: User, label: 'Format', value: opportunity.format },
     { icon: Clock, label: 'Deadline', value: formatDate(opportunity.deadline.toDate(), 'PPP') },
   ];
+  if (opportunity.grades && opportunity.grades.length > 0) {
+      details.push({ icon: BookCopy, label: 'Grades', value: opportunity.grades.join(', ')})
+  }
 
   return (
     <ProtectedRoute allowedRoles={['student', 'admin']}>
@@ -107,8 +110,8 @@ export default function OpportunityDetailPage() {
              <Card>
                 <CardContent className="p-6 space-y-4">
                      {details.map(detail => (
-                        <div key={detail.label} className="flex items-center text-sm">
-                            <detail.icon className="h-5 w-5 text-primary mr-3" />
+                        <div key={detail.label} className="flex items-start text-sm">
+                            <detail.icon className="h-5 w-5 text-primary mr-3 mt-0.5 shrink-0" />
                             <span className="font-semibold mr-2">{detail.label}:</span>
                             <span className="text-muted-foreground">{detail.value}</span>
                         </div>
