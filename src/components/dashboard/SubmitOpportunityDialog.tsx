@@ -21,13 +21,14 @@ import { format as formatDate } from 'date-fns';
 import { Calendar } from '../ui/calendar';
 import { Label } from '../ui/label';
 import { Timestamp } from 'firebase/firestore';
+import { Slider } from '../ui/slider';
 
 const opportunitySchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.'),
   type: z.enum(['MUN', 'Internship', 'Volunteering', 'Competition', 'Summer Camp', 'Hackathon']),
   description: z.string().min(20, 'Description must be at least 20 characters.'),
   subject: z.string().min(2, 'Subject is required.'),
-  ageRange: z.tuple([z.number().min(13), z.number().max(30)]),
+  ageRange: z.tuple([z.number().min(13), z.number().max(30)]).refine(data => data[0] <= data[1], { message: "Minimum age cannot be greater than maximum age."}),
   price: z.enum(['Free', 'Paid']),
   audience: z.enum(['All Nationalities', 'Emiratis Only']),
   format: z.enum(['Online', 'Offline']),
@@ -37,7 +38,7 @@ const opportunitySchema = z.object({
 });
 
 const opportunityTypes: OpportunityType[] = ['MUN', 'Internship', 'Volunteering', 'Competition', 'Summer Camp', 'Hackathon'];
-const subjects = ['Technology', 'Business', 'Arts & Culture', 'Science', 'Politics', 'Social Work'];
+const subjects = ['Technology', 'Business', 'Arts & Culture', 'Science', 'Politics', 'Social Work', 'Engineering', 'Health & Medicine', 'Environment'];
 
 interface SubmitOpportunityDialogProps {
   opportunityToEdit?: Opportunity;
@@ -164,6 +165,22 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                 </Popover><FormMessage /></FormItem>
               )}
             />
+             <FormField control={form.control} name="ageRange" render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Age Range: {field.value[0]} - {field.value[1]}</FormLabel>
+                    <FormControl>
+                        <Slider
+                            min={13}
+                            max={30}
+                            step={1}
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            className="mt-4"
+                        />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+            )}/>
             <div className="grid grid-cols-2 gap-4">
                 <FormField control={form.control} name="price" render={({ field }) => (
                     <FormItem><FormLabel>Price</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex space-x-4 pt-2">

@@ -30,7 +30,7 @@ interface FilterSidebarProps {
 }
 
 const opportunityTypes = ['MUN', 'Internship', 'Volunteering', 'Competition', 'Summer Camp', 'Hackathon'];
-const subjects = ['Technology', 'Business', 'Arts & Culture', 'Science', 'Politics', 'Social Work'];
+const subjects = ['Technology', 'Business', 'Arts & Culture', 'Science', 'Politics', 'Social Work', 'Engineering', 'Health & Medicine', 'Environment'];
 
 export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
   const isMobile = useIsMobile();
