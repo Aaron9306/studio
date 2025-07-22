@@ -117,10 +117,6 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
       onValueChange([]);
     }
 
-    const filteredOptions = options.filter(option =>
-      option.label.toLowerCase().includes(inputValue.toLowerCase())
-    );
-
     return (
       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
         <PopoverTrigger asChild>
@@ -193,7 +189,6 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
                 <CommandInput
                 placeholder="Search..."
                 onKeyDown={handleInputKeyDown}
-                onValueChange={setInputValue}
                 />
                 <CommandList>
                 <CommandEmpty>No results found.</CommandEmpty>
