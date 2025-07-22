@@ -2,7 +2,7 @@
 'use client';
 
 import { cva, type VariantProps } from 'class-variance-authority';
-import { CheckIcon, XCircle, ChevronDown, XIcon } from 'lucide-react';
+import { CheckIcon, XCircle, ChevronDown, XIcon, CheckSquare, XSquare } from 'lucide-react';
 import * as React from 'react';
 import {
   Command,
@@ -71,7 +71,6 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
   ) => {
     const [selectedValues, setSelectedValues] = React.useState<string[]>(defaultValue);
     const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
-    const [isAnimating, setIsAnimating] = React.useState(false);
 
     React.useEffect(() => {
       setSelectedValues(defaultValue);
@@ -192,19 +191,21 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
                 <CommandItem
-                    key="select-all"
-                    onSelect={handleSelectAll}
-                    className="cursor-pointer"
-                  >
-                   Select All
-                  </CommandItem>
-                 <CommandItem
-                    key="deselect-all"
-                    onSelect={handleDeselectAll}
-                    className="cursor-pointer"
-                  >
-                   Deselect All
-                  </CommandItem>
+                  key="select-all"
+                  onSelect={handleSelectAll}
+                  className="cursor-pointer flex items-center gap-2"
+                >
+                  <CheckSquare className="h-4 w-4" />
+                  Select All
+                </CommandItem>
+                <CommandItem
+                  key="deselect-all"
+                  onSelect={handleDeselectAll}
+                  className="cursor-pointer flex items-center gap-2"
+                >
+                  <XSquare className="h-4 w-4" />
+                  Deselect All
+                </CommandItem>
                 <CommandSeparator />
                 {options.map((option) => {
                   const isSelected = selectedValues.includes(option.value);
@@ -269,4 +270,3 @@ const Separator = React.forwardRef<
 );
 
 Separator.displayName = 'Separator';
-
