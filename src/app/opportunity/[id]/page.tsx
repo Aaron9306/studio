@@ -74,7 +74,6 @@ export default function OpportunityDetailPage() {
   const details = [
     { icon: Tag, label: 'Type', value: opportunity.type },
     { icon: Globe, label: 'Audience', value: opportunity.audience },
-    { icon: Users, label: 'Age Range', value: `${opportunity.ageRange[0]} - ${opportunity.ageRange[1]}` },
     { icon: Wallet, label: 'Price', value: opportunity.price },
     { icon: User, label: 'Format', value: opportunity.format },
     { icon: Clock, label: 'Deadline', value: formatDate(opportunity.deadline.toDate(), 'PPP') },

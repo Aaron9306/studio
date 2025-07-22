@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Filter, X, ChevronsUpDown, Check } from 'lucide-react';
@@ -25,7 +24,6 @@ export interface Filters {
   price: string;
   audience: string;
   format: string;
-  ageRange: [number, number];
   grades: number[];
   deadline: string;
   emirate: Emirate | 'all';
@@ -73,7 +71,6 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
       price: 'all',
       audience: 'all',
       format: 'all',
-      ageRange: [1, 30],
       grades: [],
       deadline: 'all',
       emirate: 'all'
@@ -263,20 +260,6 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
                     <Label htmlFor="deadline-month" className="font-normal">Closing this month</Label>
                 </div>
             </RadioGroup>
-          </div>
-          <Separator />
-          {/* Age */}
-          <div>
-            <Label htmlFor="age">Age Range: {filters.ageRange[0]} - {filters.ageRange[1]}</Label>
-            <Slider 
-              id="age"
-              min={1} 
-              max={30} 
-              step={1} 
-              value={filters.ageRange}
-              onValueChange={value => setFilters(prev => ({...prev, ageRange: [value[0], value[1]]}))}
-              className="mt-4"
-            />
           </div>
         </div>
       </ScrollArea>

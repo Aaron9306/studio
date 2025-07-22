@@ -21,7 +21,6 @@ import { format as formatDate } from 'date-fns';
 import { Calendar } from '../ui/calendar';
 import { Label } from '../ui/label';
 import { Timestamp } from 'firebase/firestore';
-import { Slider } from '../ui/slider';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
 import { Badge } from '../ui/badge';
 
@@ -35,7 +34,6 @@ const opportunitySchema = z.object({
   type: z.enum(['MUN', 'Internship', 'Volunteering', 'Competition', 'Summer Camp', 'Hackathon', 'Workshop']),
   description: z.string().min(20, 'Description must be at least 20 characters.'),
   subject: z.string().min(2, 'Subject is required.'),
-  ageRange: z.tuple([z.number().min(1), z.number().max(30)]).refine(data => data[0] <= data[1], { message: "Minimum age cannot be greater than maximum age."}),
   grades: z.array(z.number()),
   price: z.enum(['Free', 'Paid']),
   audience: z.enum(['All Nationalities', 'Emiratis Only']),
@@ -70,7 +68,6 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
       type: 'Internship',
       description: '',
       subject: '',
-      ageRange: [16, 25],
       grades: [],
       price: 'Free',
       audience: 'All Nationalities',
@@ -96,7 +93,6 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
               type: 'Internship',
               description: '',
               subject: '',
-              ageRange: [16, 25],
               grades: [],
               price: 'Free',
               audience: 'All Nationalities',
@@ -190,22 +186,6 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                 </Popover><FormMessage /></FormItem>
               )}
             />
-             <FormField control={form.control} name="ageRange" render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Age Range: {field.value[0]} - {field.value[1]}</FormLabel>
-                    <FormControl>
-                        <Slider
-                            min={1}
-                            max={30}
-                            step={1}
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            className="mt-4"
-                        />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-            )}/>
             <FormField control={form.control} name="grades" render={({ field }) => (
               <FormItem>
                 <FormLabel>Grades</FormLabel>
@@ -237,7 +217,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                         <CommandGroup>
                            <CommandItem
                             onSelect={() => {
-                              field.onChange(field.value?.length === gradeOptions.length ? [] : gradeOptions.map(o => o.value))
+                              form.setValue("grades", field.value?.length === gradeOptions.length ? [] : gradeOptions.map(o => o.value))
                             }}
                           >
                             <Check className={cn("mr-2 h-4 w-4", field.value?.length === gradeOptions.length ? "opacity-100" : "opacity-0")} />
@@ -251,7 +231,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                                 const newGrades = selectedGrades.includes(option.value)
                                   ? selectedGrades.filter((g) => g !== option.value)
                                   : [...selectedGrades, option.value];
-                                field.onChange(newGrades.sort((a,b) => a-b));
+                                form.setValue("grades", newGrades.sort((a,b) => a-b));
                               }}
                             >
                               <Check className={cn("mr-2 h-4 w-4", field.value?.includes(option.value) ? "opacity-100" : "opacity-0")} />

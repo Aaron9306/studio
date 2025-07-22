@@ -22,7 +22,6 @@ export default function DashboardPage() {
     price: 'all',
     audience: 'all',
     format: 'all',
-    ageRange: [1, 30],
     grades: [],
     deadline: 'all',
     emirate: 'all',
@@ -41,11 +40,6 @@ export default function DashboardPage() {
         const formatMatch = filters.format === 'all' || opp.format === filters.format;
         const emirateMatch = filters.emirate === 'all' || opp.emirate === filters.emirate;
         const audienceMatch = filters.audience === 'all' || opp.audience === filters.audience;
-
-        const [filterMinAge, filterMaxAge] = filters.ageRange;
-        const [oppMinAge, oppMaxAge] = opp.ageRange;
-        // Corrected Overlap Logic: Show if any part of the opportunity's age range is within the filter's range.
-        const ageMatch = Math.max(filterMinAge, oppMinAge) <= Math.min(filterMaxAge, oppMaxAge);
         
         const gradeMatch = filters.grades.length === 0 || (opp.grades && opp.grades.some(grade => filters.grades.includes(grade)));
         
@@ -62,7 +56,7 @@ export default function DashboardPage() {
             deadlineMatch = deadlineDate >= now && deadlineDate <= endOfMonthDate;
         }
 
-        return searchMatch && typeMatch && subjectMatch && priceMatch && audienceMatch && formatMatch && ageMatch && deadlineMatch && emirateMatch && gradeMatch;
+        return searchMatch && typeMatch && subjectMatch && priceMatch && audienceMatch && formatMatch && deadlineMatch && emirateMatch && gradeMatch;
       });
   }, [opportunities, filters]);
 
