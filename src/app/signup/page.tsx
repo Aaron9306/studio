@@ -38,19 +38,26 @@ export default function SignupPage() {
   }, [user, router]);
 
   const onSubmit = async (values: z.infer<typeof signupSchema>) => {
-    const success = await signup(values.name, values.email, values.password);
-    if (success) {
-      toast({
-        title: 'Account Created',
-        description: "We've created your account for you.",
-      });
-    } else {
-      toast({
-        variant: 'destructive',
-        title: 'Signup Failed',
-        description: 'An account with this email already exists.',
-      });
-      form.setError('email', { message: 'This email is already taken.' });
+    try {
+      const success = await signup(values.name, values.email, values.password);
+      if (success) {
+        toast({
+          title: 'Account Created',
+          description: "We've created your account for you.",
+        });
+      }
+    } catch (error: any) {
+      // The signup function in AuthContext now throws an error for non-duplicate email issues.
+      // We only want to set the form error if the email is already taken.
+      if (error.code === 'auth/email-already-in-use') {
+         toast({
+          variant: 'destructive',
+          title: 'Signup Failed',
+          description: 'An account with this email already exists.',
+        });
+        form.setError('email', { message: 'This email is already taken.' });
+      }
+      // Other errors are already handled by a toast in the AuthContext, so we don't need to do anything here.
     }
   };
 

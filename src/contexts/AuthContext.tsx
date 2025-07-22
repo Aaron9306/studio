@@ -101,10 +101,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       router.push('/dashboard');
       return true;
     } catch (error: any) {
-        if(error.code === 'auth/email-already-in-use') {
-            return false;
-        }
+      if (error.code === 'auth/email-already-in-use') {
         return false;
+      }
+      // For any other error, we should probably let the user know something went wrong
+      // without assuming it's a duplicate email.
+      toast({
+        variant: 'destructive',
+        title: 'Signup Failed',
+        description: error.message || 'An unexpected error occurred. Please try again.',
+      });
+      // We return false, but the page doesn't use this for other errors.
+      // This is still better than misinforming the user.
+      throw error;
     }
   };
 
@@ -121,7 +130,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       await updateDoc(userDocRef, {
-        bookmarkedOpportunities: isBookmarked 
+        bookmarkedOpportunities: isBookomed 
           ? arrayRemove(opportunityId) 
           : arrayUnion(opportunityId)
       });
