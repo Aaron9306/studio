@@ -2,7 +2,7 @@
 'use client';
 
 import { cva, type VariantProps } from 'class-variance-authority';
-import { CheckIcon, XCircle, ChevronDown, XIcon, CheckSquare, XSquare } from 'lucide-react';
+import { CheckIcon, XCircle, ChevronDown, XIcon } from 'lucide-react';
 import * as React from 'react';
 import {
   Command,
@@ -71,6 +71,8 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
   ) => {
     const [selectedValues, setSelectedValues] = React.useState<string[]>(defaultValue);
     const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
+    const [inputValue, setInputValue] = React.useState('');
+
 
     React.useEffect(() => {
       setSelectedValues(defaultValue);
@@ -114,6 +116,10 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
       setSelectedValues([]);
       onValueChange([]);
     }
+
+    const filteredOptions = options.filter(option =>
+      option.label.toLowerCase().includes(inputValue.toLowerCase())
+    );
 
     return (
       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
@@ -179,46 +185,46 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0" align="start"
+        <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start"
           onEscapeKeyDown={() => setIsPopoverOpen(false)}
         >
           <Command>
             <CommandInput
               placeholder="Search..."
               onKeyDown={handleInputKeyDown}
+              onValueChange={setInputValue}
             />
              <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
-              <CommandGroup>
-                <CommandItem
-                  key="select-all"
-                  onSelect={handleSelectAll}
-                  className="cursor-pointer flex items-center gap-2"
-                >
-                  <CheckSquare className="h-4 w-4" />
-                  Select All
-                </CommandItem>
-                <CommandItem
-                  key="deselect-all"
-                  onSelect={handleDeselectAll}
-                  className="cursor-pointer flex items-center gap-2"
-                >
-                  <XSquare className="h-4 w-4" />
-                  Deselect All
-                </CommandItem>
-                <CommandSeparator />
-                {options.map((option) => {
+               {inputValue === '' && (
+                <CommandGroup heading="Actions" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground">
+                    <CommandItem
+                        onSelect={handleSelectAll}
+                        className="cursor-pointer"
+                    >
+                        Select All
+                    </CommandItem>
+                    <CommandItem
+                        onSelect={handleDeselectAll}
+                        className="cursor-pointer"
+                    >
+                       Deselect All
+                    </CommandItem>
+                </CommandGroup>
+               )}
+              <CommandGroup className="h-full overflow-auto">
+                {filteredOptions.map((option) => {
                   const isSelected = selectedValues.includes(option.value);
                   return (
                     <CommandItem
                       key={option.value}
                       onSelect={() => toggleOption(option.value)}
-                      style={{
-                        pointerEvents: 'auto',
-                        opacity: 1,
-                      }}
-                      className="cursor-pointer"
+                      className="cursor-pointer flex items-center justify-between"
                     >
+                      <div className="flex items-center">
+                        {option.icon && <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
+                        <span>{option.label}</span>
+                      </div>
                       <div
                         className={cn(
                           'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
@@ -229,8 +235,6 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
                       >
                         <CheckIcon className="h-4 w-4" />
                       </div>
-                      {option.icon && <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
-                      <span>{option.label}</span>
                     </CommandItem>
                   );
                 })}
