@@ -1,3 +1,4 @@
+
 'use client';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -177,7 +178,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                 <FormItem><FormLabel>Emirate</FormLabel><Select onValueChange={field.onChange} value={field.value}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Select an Emirate" /></SelectTrigger></FormControl>
                     <SelectContent>{emirates.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent>
-                </Select><FormMessage /></FormMessage>
+                </Select></FormMessage>
             )}/>
              <FormField control={form.control} name="deadline" render={({ field }) => (
               <FormItem className="flex flex-col"><FormLabel>Deadline</FormLabel>
