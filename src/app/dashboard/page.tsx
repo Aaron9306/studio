@@ -58,7 +58,7 @@ export default function DashboardPage() {
   }, [opportunities, filters]);
 
   const bookmarkedOpportunities = useMemo(() => {
-    if (!user) return [];
+    if (!user || !user.bookmarkedOpportunities) return [];
     return opportunities.filter(opp => user.bookmarkedOpportunities.includes(opp.id));
   }, [opportunities, user]);
 
