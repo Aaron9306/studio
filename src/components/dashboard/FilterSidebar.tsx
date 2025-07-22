@@ -7,15 +7,14 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Filter, X, ChevronsUpDown, Check } from 'lucide-react';
+import { Filter, X } from 'lucide-react';
 import React, { Dispatch, SetStateAction } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ScrollArea } from '../ui/scroll-area';
 import { Emirate } from '@/lib/types';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
-import { cn } from '@/lib/utils';
 import { Badge } from '../ui/badge';
+import { GradeSelect } from './GradeSelect';
+
 
 export interface Filters {
   search: string;
@@ -37,10 +36,7 @@ interface FilterSidebarProps {
 const opportunityTypes = ['MUN', 'Internship', 'Volunteering', 'Competition', 'Summer Camp', 'Hackathon', 'Workshop'];
 const subjects = ['Technology', 'Business', 'Arts & Culture', 'Science', 'Politics', 'Social Work', 'Engineering', 'Health & Medicine', 'Environment'];
 const emirates: Emirate[] = ["Abu Dhabi", "Ajman", "Dubai", "Fujairah", "Ras Al Khaimah", "Sharjah", "Umm Al Quwain"];
-const gradeOptions = Array.from({ length: 12 }, (_, i) => ({
-  value: i + 1,
-  label: `Grade ${i + 1}`,
-}));
+
 
 export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
   const isMobile = useIsMobile();
@@ -54,12 +50,10 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
     }));
   };
 
-  const handleGradeChange = (grade: number) => {
+  const handleGradeChange = (grades: number[]) => {
      setFilters(prev => ({
       ...prev,
-      grades: prev.grades.includes(grade)
-        ? prev.grades.filter(g => g !== grade)
-        : [...prev.grades, grade]
+      grades: grades
     }));
   }
 
@@ -119,49 +113,10 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
           {/* Grades */}
           <div>
             <Label>Grades</Label>
-             <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" role="combobox" className={cn("w-full justify-between h-auto", !filters.grades.length && "text-muted-foreground")}>
-                      <div className="flex gap-1 flex-wrap">
-                          {filters.grades.length > 0 ? (
-                            filters.grades.sort((a,b) => a-b).map((grade) => (
-                              <Badge variant="secondary" key={grade}>
-                                Grade {grade}
-                              </Badge>
-                            ))
-                          ) : (
-                            "All Grades"
-                          )}
-                        </div>
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                    <Command>
-                      <CommandInput placeholder="Search grades..." />
-                      <CommandEmpty>No grades found.</CommandEmpty>
-                       <CommandList>
-                        <CommandGroup>
-                            <CommandItem onSelect={() => setFilters(prev => ({...prev, grades: []}))}>
-                                <Check className={cn("mr-2 h-4 w-4", filters.grades.length === 0 ? "opacity-100" : "opacity-0")} />
-                                All Grades
-                            </CommandItem>
-                            {gradeOptions.map((option) => (
-                            <CommandItem
-                                key={option.value}
-                                onSelect={() => {
-                                  handleGradeChange(option.value)
-                                }}
-                            >
-                                <Check className={cn("mr-2 h-4 w-4", filters.grades.includes(option.value) ? "opacity-100" : "opacity-0")} />
-                                {option.label}
-                            </CommandItem>
-                            ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
+             <GradeSelect
+                selectedGrades={filters.grades}
+                onGradesChange={handleGradeChange}
+              />
           </div>
           <Separator />
           {/* Subject/Field */}
