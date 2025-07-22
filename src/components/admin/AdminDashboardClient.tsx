@@ -8,6 +8,7 @@ import { Button } from "../ui/button";
 import { FilePlus } from "lucide-react";
 import { SubmitOpportunityDialog } from "../dashboard/SubmitOpportunityDialog";
 import { Skeleton } from "../ui/skeleton";
+import { Card, CardContent } from "../ui/card";
 
 export default function AdminDashboardClient() {
   const { opportunities, loading } = useOpportunities();
