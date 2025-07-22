@@ -20,7 +20,7 @@ export interface Filters {
   price: string;
   audience: string;
   format: string;
-  age: number;
+  ageRange: [number, number];
   deadline: string;
 }
 
@@ -52,7 +52,7 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
       price: 'all',
       audience: 'all',
       format: 'all',
-      age: 30,
+      ageRange: [13, 30],
       deadline: 'all'
     });
   };
@@ -184,14 +184,14 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
           <Separator />
           {/* Age */}
           <div>
-            <Label htmlFor="age">Age (up to {filters.age})</Label>
+            <Label htmlFor="age">Age Range: {filters.ageRange[0]} - {filters.ageRange[1]}</Label>
             <Slider 
               id="age"
               min={13} 
               max={30} 
               step={1} 
-              value={[filters.age]}
-              onValueChange={value => setFilters(prev => ({...prev, age: value[0]}))}
+              value={filters.ageRange}
+              onValueChange={value => setFilters(prev => ({...prev, ageRange: [value[0], value[1]]}))}
               className="mt-4"
             />
           </div>

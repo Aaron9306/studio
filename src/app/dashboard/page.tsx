@@ -22,7 +22,7 @@ export default function DashboardPage() {
     price: 'all',
     audience: 'all',
     format: 'all',
-    age: 30,
+    ageRange: [13, 30],
     deadline: 'all',
   });
 
@@ -38,7 +38,7 @@ export default function DashboardPage() {
         const priceMatch = filters.price === 'all' || opp.price === filters.price;
         const audienceMatch = filters.audience === 'all' || opp.audience === filters.audience;
         const formatMatch = filters.format === 'all' || opp.format === filters.format;
-        const ageMatch = filters.age >= opp.ageRange[0] && filters.age <= opp.ageRange[1];
+        const ageMatch = opp.ageRange[0] >= filters.ageRange[0] && opp.ageRange[1] <= filters.ageRange[1];
         
         const deadlineDate = opp.deadline.toDate();
         const now = new Date();
