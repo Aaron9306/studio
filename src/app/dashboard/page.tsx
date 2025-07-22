@@ -4,7 +4,7 @@ import { useOpportunities } from '@/contexts/OpportunityContext';
 import { FilterSidebar, Filters } from '@/components/dashboard/FilterSidebar';
 import { OpportunityCard } from '@/components/dashboard/OpportunityCard';
 import { Button } from '@/components/ui/button';
-import { FilePlus, Bookmarks } from 'lucide-react';
+import { FilePlus, Bookmark } from 'lucide-react';
 import { SubmitOpportunityDialog } from '@/components/dashboard/SubmitOpportunityDialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { Opportunity } from '@/lib/types';
@@ -54,7 +54,7 @@ export default function DashboardPage() {
              <TabsList>
               <TabsTrigger value="all">All Opportunities</TabsTrigger>
               <TabsTrigger value="bookmarked">
-                <Bookmarks className="mr-2 h-4 w-4" />
+                <Bookmark className="mr-2 h-4 w-4" />
                 Saved
               </TabsTrigger>
             </TabsList>
