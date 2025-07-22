@@ -34,7 +34,7 @@ const opportunitySchema = z.object({
   type: z.enum(['MUN', 'Internship', 'Volunteering', 'Competition', 'Summer Camp', 'Hackathon', 'Workshop']),
   description: z.string().min(20, 'Description must be at least 20 characters.'),
   subject: z.string().min(2, 'Subject is required.'),
-  grades: z.array(z.number()),
+  grades: z.array(z.number()).min(1, 'At least one grade must be selected.'),
   price: z.enum(['Free', 'Paid']),
   audience: z.enum(['All Nationalities', 'Emiratis Only']),
   format: z.enum(['Online', 'Offline']),
@@ -195,30 +195,30 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
-                          <div className="flex flex-wrap gap-2 p-2 border rounded-md min-h-10">
-                            {field.value.length > 0 ? (
-                              field.value.sort((a,b) => a-b).map((grade) => (
-                                <Badge variant="secondary" key={grade} className="flex items-center gap-1">
-                                  Grade {grade}
-                                  <button
-                                    type="button"
-                                    className="rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      const newGrades = field.value.filter((g) => g !== grade);
-                                      form.setValue("grades", newGrades);
-                                    }}
-                                  >
-                                    <X className="h-3 w-3" />
-                                    <span className="sr-only">Remove grade {grade}</span>
-                                  </button>
-                                </Badge>
-                              ))
-                            ) : (
-                              <span className="text-sm text-muted-foreground px-1 py-0.5">Select grades...</span>
-                            )}
-                             <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
-                          </div>
+                            <Button variant="outline" role="combobox" className={cn("w-full justify-between h-auto min-h-10", field.value?.length === 0 && "text-muted-foreground")}>
+                                <div className="flex gap-1 flex-wrap">
+                                    {field.value?.length > 0 ? (
+                                    field.value.sort((a,b) => a-b).map((grade) => (
+                                        <Badge
+                                            variant="secondary"
+                                            key={grade}
+                                            className="flex items-center gap-1"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                const newGrades = field.value.filter((g) => g !== grade);
+                                                form.setValue("grades", newGrades);
+                                            }}
+                                        >
+                                        Grade {grade}
+                                        <X className="h-3 w-3" />
+                                        </Badge>
+                                    ))
+                                    ) : (
+                                    "Select grades..."
+                                    )}
+                                </div>
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
@@ -231,7 +231,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                                 onSelect={() => {
                                   const allGrades = gradeOptions.map(o => o.value);
                                   const currentGrades = field.value || [];
-                                  const allSelected = allGrades.every(g => currentGrades.includes(g));
+                                  const allSelected = allGrades.every(g => currentGrades.includes(g)) && allGrades.length === currentGrades.length;
                                   form.setValue("grades", allSelected ? [] : allGrades)
                                 }}
                               >

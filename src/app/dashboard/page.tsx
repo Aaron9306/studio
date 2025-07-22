@@ -39,6 +39,7 @@ export default function DashboardPage() {
         const priceMatch = filters.price === 'all' || opp.price === filters.price;
         const formatMatch = filters.format === 'all' || opp.format === filters.format;
         const emirateMatch = filters.emirate === 'all' || opp.emirate === filters.emirate;
+        
         const audienceMatch = filters.audience === 'all' || opp.audience === filters.audience;
         
         const gradeMatch = filters.grades.length === 0 || (opp.grades && opp.grades.some(grade => filters.grades.includes(grade)));
@@ -52,7 +53,8 @@ export default function DashboardPage() {
         } else if (filters.deadline === 'month') {
             const endOfMonthDate = addMonths(now, 1);
             endOfMonthDate.setDate(1); 
-            endOfMonthDate.setDate(endOfMonthDate.getDate() - 1);
+            endOfMonthDate.setMonth(endOfMonthDate.getMonth() + 1);
+            endOfMonthDate.setDate(0);
             deadlineMatch = deadlineDate >= now && deadlineDate <= endOfMonthDate;
         }
 
