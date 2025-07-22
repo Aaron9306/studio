@@ -12,6 +12,7 @@ import { Filter, X } from 'lucide-react';
 import React, { Dispatch, SetStateAction } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ScrollArea } from '../ui/scroll-area';
+import { Emirate } from '@/lib/types';
 
 export interface Filters {
   search: string;
@@ -22,6 +23,7 @@ export interface Filters {
   format: string;
   ageRange: [number, number];
   deadline: string;
+  emirate: Emirate | 'all';
 }
 
 interface FilterSidebarProps {
@@ -29,8 +31,10 @@ interface FilterSidebarProps {
   setFilters: Dispatch<SetStateAction<Filters>>;
 }
 
-const opportunityTypes = ['MUN', 'Internship', 'Volunteering', 'Competition', 'Summer Camp', 'Hackathon'];
+const opportunityTypes = ['MUN', 'Internship', 'Volunteering', 'Competition', 'Summer Camp', 'Hackathon', 'Workshop'];
 const subjects = ['Technology', 'Business', 'Arts & Culture', 'Science', 'Politics', 'Social Work', 'Engineering', 'Health & Medicine', 'Environment'];
+const emirates: Emirate[] = ["Abu Dhabi", "Ajman", "Dubai", "Fujairah", "Ras Al Khaimah", "Sharjah", "Umm Al Quwain"];
+
 
 export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
   const isMobile = useIsMobile();
@@ -52,8 +56,9 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
       price: 'all',
       audience: 'all',
       format: 'all',
-      ageRange: [13, 30],
-      deadline: 'all'
+      ageRange: [1, 30],
+      deadline: 'all',
+      emirate: 'all'
     });
   };
 
@@ -106,6 +111,20 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
               <SelectContent>
                 <SelectItem value="all">All Subjects</SelectItem>
                 {subjects.map(subject => <SelectItem key={subject} value={subject}>{subject}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <Separator />
+          {/* Emirate */}
+          <div>
+            <Label htmlFor="emirate">Emirate</Label>
+            <Select value={filters.emirate} onValueChange={value => setFilters(prev => ({...prev, emirate: value as Emirate | 'all'}))}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select an Emirate" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Emirates</SelectItem>
+                {emirates.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -187,7 +206,7 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
             <Label htmlFor="age">Age Range: {filters.ageRange[0]} - {filters.ageRange[1]}</Label>
             <Slider 
               id="age"
-              min={13} 
+              min={1} 
               max={30} 
               step={1} 
               value={filters.ageRange}

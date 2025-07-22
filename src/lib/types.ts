@@ -1,10 +1,12 @@
 import { Timestamp } from "firebase/firestore";
 
-export type OpportunityType = 'MUN' | 'Internship' | 'Volunteering' | 'Competition' | 'Summer Camp' | 'Hackathon';
+export type OpportunityType = 'MUN' | 'Internship' | 'Volunteering' | 'Competition' | 'Summer Camp' | 'Hackathon' | 'Workshop';
 export type OpportunityAudience = 'All Nationalities' | 'Emiratis Only';
 export type OpportunityFormat = 'Online' | 'Offline';
 export type OpportunityPrice = 'Free' | 'Paid';
 export type OpportunityStatus = 'pending' | 'approved' | 'rejected';
+export type Emirate = "All Emirates" | "Abu Dhabi" | "Ajman" | "Dubai" | "Fujairah" | "Ras Al Khaimah" | "Sharjah" | "Umm Al Quwain";
+
 
 export interface Opportunity {
   id: string;
@@ -17,6 +19,7 @@ export interface Opportunity {
   audience: OpportunityAudience;
   format: OpportunityFormat;
   deadline: Timestamp;
+  emirate: Emirate;
   registrationLink?: string;
   imageUrl?: string;
   status: OpportunityStatus;

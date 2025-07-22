@@ -22,8 +22,9 @@ export default function DashboardPage() {
     price: 'all',
     audience: 'all',
     format: 'all',
-    ageRange: [13, 30],
+    ageRange: [1, 30],
     deadline: 'all',
+    emirate: 'all',
   });
 
   const loading = oppsLoading || authLoading;
@@ -39,6 +40,7 @@ export default function DashboardPage() {
         const audienceMatch = filters.audience === 'all' || opp.audience === filters.audience;
         const formatMatch = filters.format === 'all' || opp.format === filters.format;
         const ageMatch = opp.ageRange[0] >= filters.ageRange[0] && opp.ageRange[1] <= filters.ageRange[1];
+        const emirateMatch = filters.emirate === 'all' || opp.emirate === filters.emirate;
         
         const deadlineDate = opp.deadline.toDate();
         const now = new Date();
@@ -53,7 +55,7 @@ export default function DashboardPage() {
             deadlineMatch = deadlineDate >= now && deadlineDate <= endOfMonthDate;
         }
 
-        return searchMatch && typeMatch && subjectMatch && priceMatch && audienceMatch && formatMatch && ageMatch && deadlineMatch;
+        return searchMatch && typeMatch && subjectMatch && priceMatch && audienceMatch && formatMatch && ageMatch && deadlineMatch && emirateMatch;
       });
   }, [opportunities, filters]);
 

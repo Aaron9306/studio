@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { useOpportunities } from '@/contexts/OpportunityContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Opportunity, OpportunityType } from '@/lib/types';
+import { Opportunity, OpportunityType, Emirate } from '@/lib/types';
 import { useEffect, useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { CalendarIcon } from 'lucide-react';
@@ -25,20 +25,23 @@ import { Slider } from '../ui/slider';
 
 const opportunitySchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.'),
-  type: z.enum(['MUN', 'Internship', 'Volunteering', 'Competition', 'Summer Camp', 'Hackathon']),
+  type: z.enum(['MUN', 'Internship', 'Volunteering', 'Competition', 'Summer Camp', 'Hackathon', 'Workshop']),
   description: z.string().min(20, 'Description must be at least 20 characters.'),
   subject: z.string().min(2, 'Subject is required.'),
-  ageRange: z.tuple([z.number().min(13), z.number().max(30)]).refine(data => data[0] <= data[1], { message: "Minimum age cannot be greater than maximum age."}),
+  ageRange: z.tuple([z.number().min(1), z.number().max(30)]).refine(data => data[0] <= data[1], { message: "Minimum age cannot be greater than maximum age."}),
   price: z.enum(['Free', 'Paid']),
   audience: z.enum(['All Nationalities', 'Emiratis Only']),
   format: z.enum(['Online', 'Offline']),
   deadline: z.date(),
+  emirate: z.enum(["Abu Dhabi", "Ajman", "Dubai", "Fujairah", "Ras Al Khaimah", "Sharjah", "Umm Al Quwain", "All Emirates"]),
   registrationLink: z.string().url('Must be a valid URL.').optional().or(z.literal('')),
   imageUrl: z.string().url('Must be a valid URL.').optional().or(z.literal('')),
 });
 
-const opportunityTypes: OpportunityType[] = ['MUN', 'Internship', 'Volunteering', 'Competition', 'Summer Camp', 'Hackathon'];
+const opportunityTypes: OpportunityType[] = ['MUN', 'Internship', 'Volunteering', 'Competition', 'Summer Camp', 'Hackathon', 'Workshop'];
 const subjects = ['Technology', 'Business', 'Arts & Culture', 'Science', 'Politics', 'Social Work', 'Engineering', 'Health & Medicine', 'Environment'];
+const emirates: Emirate[] = ["Abu Dhabi", "Ajman", "Dubai", "Fujairah", "Ras Al Khaimah", "Sharjah", "Umm Al Quwain", "All Emirates"];
+
 
 interface SubmitOpportunityDialogProps {
   opportunityToEdit?: Opportunity;
@@ -64,6 +67,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
       audience: 'All Nationalities',
       format: 'Offline',
       deadline: new Date(),
+      emirate: 'All Emirates',
       registrationLink: '',
       imageUrl: '',
     },
@@ -86,6 +90,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
             audience: 'All Nationalities',
             format: 'Offline',
             deadline: new Date(),
+            emirate: 'All Emirates',
             registrationLink: '',
             imageUrl: '',
         });
@@ -148,6 +153,12 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                     <SelectContent>{subjects.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                 </Select><FormMessage /></FormItem>
             )}/>
+            <FormField control={form.control} name="emirate" render={({ field }) => (
+                <FormItem><FormLabel>Emirate</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl><SelectTrigger><SelectValue placeholder="Select an Emirate" /></SelectTrigger></FormControl>
+                    <SelectContent>{emirates.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent>
+                </Select><FormMessage /></FormItem>
+            )}/>
              <FormField control={form.control} name="deadline" render={({ field }) => (
               <FormItem className="flex flex-col"><FormLabel>Deadline</FormLabel>
                 <Popover>
@@ -170,7 +181,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                     <FormLabel>Age Range: {field.value[0]} - {field.value[1]}</FormLabel>
                     <FormControl>
                         <Slider
-                            min={13}
+                            min={1}
                             max={30}
                             step={1}
                             value={field.value}
