@@ -19,6 +19,7 @@ import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Calendar } from '../ui/calendar';
+import { Label } from '../ui/label';
 
 const opportunitySchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.'),
