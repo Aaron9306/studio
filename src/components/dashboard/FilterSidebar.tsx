@@ -14,7 +14,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { ScrollArea } from '../ui/scroll-area';
 import { Emirate } from '@/lib/types';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '../ui/command';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
 import { cn } from '@/lib/utils';
 import { Badge } from '../ui/badge';
 
@@ -46,7 +46,6 @@ const gradeOptions = Array.from({ length: 12 }, (_, i) => ({
 
 export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
   const isMobile = useIsMobile();
-  const [gradesOpen, setGradesOpen] = useState(false);
   
   const handleTypeChange = (type: string) => {
     setFilters(prev => ({
@@ -123,18 +122,18 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
           {/* Grades */}
           <div>
             <Label>Grades</Label>
-             <Popover open={gradesOpen} onOpenChange={setGradesOpen}>
+             <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" role="combobox" className={cn("w-full justify-between h-auto", !filters.grades.length && "text-muted-foreground")}>
                       <div className="flex gap-1 flex-wrap">
                           {filters.grades.length > 0 ? (
-                            filters.grades.map((grade) => (
+                            filters.grades.sort((a,b) => a-b).map((grade) => (
                               <Badge variant="secondary" key={grade}>
                                 Grade {grade}
                               </Badge>
                             ))
                           ) : (
-                            "Select grades"
+                            "All Grades"
                           )}
                         </div>
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -144,17 +143,23 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
                     <Command>
                       <CommandInput placeholder="Search grades..." />
                       <CommandEmpty>No grades found.</CommandEmpty>
-                      <CommandGroup>
-                        {gradeOptions.map((option) => (
-                          <CommandItem
-                            key={option.value}
-                            onSelect={() => handleGradeChange(option.value)}
-                          >
-                            <Check className={cn("mr-2 h-4 w-4", filters.grades.includes(option.value) ? "opacity-100" : "opacity-0")} />
-                            {option.label}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
+                       <CommandList>
+                        <CommandGroup>
+                            <CommandItem onSelect={() => setFilters(prev => ({...prev, grades: []}))}>
+                                <Check className={cn("mr-2 h-4 w-4", filters.grades.length === 0 ? "opacity-100" : "opacity-0")} />
+                                All Grades
+                            </CommandItem>
+                            {gradeOptions.map((option) => (
+                            <CommandItem
+                                key={option.value}
+                                onSelect={() => handleGradeChange(option.value)}
+                            >
+                                <Check className={cn("mr-2 h-4 w-4", filters.grades.includes(option.value) ? "opacity-100" : "opacity-0")} />
+                                {option.label}
+                            </CommandItem>
+                            ))}
+                        </CommandGroup>
+                      </CommandList>
                     </Command>
                   </PopoverContent>
                 </Popover>

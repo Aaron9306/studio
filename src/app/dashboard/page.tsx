@@ -38,10 +38,20 @@ export default function DashboardPage() {
         const typeMatch = filters.types.length === 0 || filters.types.includes(opp.type);
         const subjectMatch = filters.subject === 'all' || opp.subject === filters.subject;
         const priceMatch = filters.price === 'all' || opp.price === filters.price;
-        const audienceMatch = filters.audience === 'all' || opp.audience === filters.audience;
         const formatMatch = filters.format === 'all' || opp.format === filters.format;
-        const ageMatch = opp.ageRange[0] >= filters.ageRange[0] && opp.ageRange[1] <= filters.ageRange[1];
         const emirateMatch = filters.emirate === 'all' || opp.emirate === filters.emirate;
+
+        // Audience Match: if filter is 'all', show only 'All Nationalities'. If filter is 'Emiratis Only', show 'Emiratis Only'
+        const audienceMatch = filters.audience === 'all'
+          ? opp.audience === 'All Nationalities'
+          : opp.audience === filters.audience;
+
+        // Age Match: Check for overlap between opportunity age range and filter age range.
+        const [filterMinAge, filterMaxAge] = filters.ageRange;
+        const [oppMinAge, oppMaxAge] = opp.ageRange;
+        const ageMatch = filterMinAge <= oppMaxAge && filterMaxAge >= oppMinAge;
+
+        // Grade Match: if no grades are selected in filter, show all. Otherwise check for intersection.
         const gradeMatch = filters.grades.length === 0 || (opp.grades && opp.grades.some(grade => filters.grades.includes(grade)));
         
         const deadlineDate = opp.deadline.toDate();
