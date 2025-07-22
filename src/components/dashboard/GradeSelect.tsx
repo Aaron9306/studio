@@ -26,9 +26,11 @@ interface GradeSelectProps {
 export function GradeSelect({ selectedGrades, onGradesChange, className }: GradeSelectProps) {
   const handleSelect = (value: string) => {
     const gradeNumber = parseInt(value, 10);
-    if (!selectedGrades.includes(gradeNumber)) {
-      onGradesChange([...selectedGrades, gradeNumber].sort((a,b) => a-b));
-    }
+    const newSelectedGrades = selectedGrades.includes(gradeNumber)
+      ? selectedGrades.filter((g) => g !== gradeNumber)
+      : [...selectedGrades, gradeNumber];
+      
+    onGradesChange(newSelectedGrades.sort((a, b) => a - b));
   };
 
   const handleRemove = (grade: number) => {
@@ -43,8 +45,15 @@ export function GradeSelect({ selectedGrades, onGradesChange, className }: Grade
     }
   }
 
+  // Prevents the dropdown from closing when an item is clicked
+  const handleItemSelect = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+
   return (
-    <Select onValueChange={handleSelect} value="">
+    <Select onValueChange={() => {}} value="">
       <SelectTrigger
         className={cn(
           'h-auto min-h-10 w-full justify-between',
@@ -76,23 +85,28 @@ export function GradeSelect({ selectedGrades, onGradesChange, className }: Grade
         </SelectValue>
       </SelectTrigger>
       <SelectContent>
-         <SelectItem value="all" onSelect={handleSelectAll}>
-            <div className='flex items-center'>
-                 <div className='w-4 mr-2'>
-                    {selectedGrades.length === gradeOptions.length && <Check className="h-4 w-4" />}
-                 </div>
-                 All Grades
-            </div>
-        </SelectItem>
+         <div 
+            className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+            onClick={handleSelectAll}
+            onMouseDown={handleItemSelect}
+        >
+            <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+                 {selectedGrades.length === gradeOptions.length && <Check className="h-4 w-4" />}
+            </span>
+             All Grades
+        </div>
         {gradeOptions.map((option) => (
-          <SelectItem key={option.value} value={String(option.value)}>
-             <div className='flex items-center'>
-                 <div className='w-4 mr-2'>
-                    {selectedGrades.includes(option.value) && <Check className="h-4 w-4" />}
-                 </div>
-                 {option.label}
-            </div>
-          </SelectItem>
+          <div 
+            key={option.value}
+            className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+            onClick={() => handleSelect(String(option.value))}
+            onMouseDown={handleItemSelect}
+          >
+             <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+                {selectedGrades.includes(option.value) && <Check className="h-4 w-4" />}
+             </span>
+             {option.label}
+          </div>
         ))}
       </SelectContent>
     </Select>
