@@ -146,7 +146,6 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
       <DialogContent 
         className="sm:max-w-[625px]"
         onInteractOutside={(e) => {
-            // Prevent closing when interacting with a popover
             if (e.target instanceof HTMLElement && e.target.closest('[data-radix-popper-content-wrapper]')) {
               e.preventDefault();
             }
