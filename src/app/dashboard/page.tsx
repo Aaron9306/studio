@@ -42,7 +42,7 @@ export default function DashboardPage() {
         
         const audienceMatch = filters.audience === 'all' || opp.audience === filters.audience;
         
-        const gradeMatch = filters.grades.length === 0 || (opp.grades && opp.grades.some(grade => filters.grades.includes(grade)));
+        const gradeMatch = filters.grades.length === 0 || (opp.grades && opp.grades.some(grade => filters.grades.includes(String(grade))));
         
         const deadlineDate = opp.deadline.toDate();
         const now = new Date();

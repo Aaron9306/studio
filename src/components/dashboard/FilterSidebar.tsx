@@ -12,8 +12,7 @@ import React, { Dispatch, SetStateAction } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ScrollArea } from '../ui/scroll-area';
 import { Emirate } from '@/lib/types';
-import { GradeSelect } from './GradeSelect';
-
+import { MultiSelect } from '../ui/multi-select';
 
 export interface Filters {
   search: string;
@@ -22,7 +21,7 @@ export interface Filters {
   price: string;
   audience: string;
   format: string;
-  grades: number[];
+  grades: string[];
   deadline: string;
   emirate: Emirate | 'all';
 }
@@ -36,6 +35,10 @@ const opportunityTypes = ['MUN', 'Internship', 'Volunteering', 'Competition', 'S
 const subjects = ['Technology', 'Business', 'Arts & Culture', 'Science', 'Politics', 'Social Work', 'Engineering', 'Health & Medicine', 'Environment'];
 const emirates: Emirate[] = ["Abu Dhabi", "Ajman", "Dubai", "Fujairah", "Ras Al Khaimah", "Sharjah", "Umm Al Quwain"];
 
+const gradeOptions = Array.from({ length: 12 }, (_, i) => ({
+  value: `${i + 1}`,
+  label: `Grade ${i + 1}`,
+}));
 
 export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
   const isMobile = useIsMobile();
@@ -49,7 +52,7 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
     }));
   };
 
-  const handleGradeChange = (grades: number[]) => {
+  const handleGradeChange = (grades: string[]) => {
      setFilters(prev => ({
       ...prev,
       grades: grades
@@ -112,9 +115,14 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
           {/* Grades */}
           <div>
             <Label>Grades</Label>
-             <GradeSelect
-                selectedGrades={filters.grades}
-                onGradesChange={handleGradeChange}
+             <MultiSelect
+                options={gradeOptions}
+                onValueChange={handleGradeChange}
+                defaultValue={filters.grades}
+                placeholder="Select grades..."
+                variant="inverted"
+                animation={2}
+                maxCount={3}
               />
           </div>
           <Separator />

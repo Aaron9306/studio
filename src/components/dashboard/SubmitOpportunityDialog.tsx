@@ -22,14 +22,14 @@ import { Calendar } from '../ui/calendar';
 import { Label } from '../ui/label';
 import { Timestamp } from 'firebase/firestore';
 import { summarizeDescription } from '@/ai/flows/summarize-flow';
-import { GradeSelect } from './GradeSelect';
+import { MultiSelect } from '../ui/multi-select';
 
 const opportunitySchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.'),
   type: z.enum(['MUN', 'Internship', 'Volunteering', 'Competition', 'Summer Camp', 'Hackathon', 'Workshop']),
   description: z.string().min(20, 'Description must be at least 20 characters.'),
   subject: z.string().min(2, 'Subject is required.'),
-  grades: z.array(z.number()).min(1, 'At least one grade must be selected.'),
+  grades: z.array(z.string()).min(1, 'At least one grade must be selected.'),
   price: z.enum(['Free', 'Paid']),
   audience: z.enum(['All Nationalities', 'Emiratis Only']),
   format: z.enum(['Online', 'Offline']),
@@ -43,6 +43,10 @@ const opportunityTypes: OpportunityType[] = ['MUN', 'Internship', 'Volunteering'
 const subjects = ['Technology', 'Business', 'Arts & Culture', 'Science', 'Politics', 'Social Work', 'Engineering', 'Health & Medicine', 'Environment'];
 const emirates: (Emirate | "All Emirates")[] = ["Abu Dhabi", "Ajman", "Dubai", "Fujairah", "Ras Al Khaimah", "Sharjah", "Umm Al Quwain", "All Emirates"];
 
+const gradeOptions = Array.from({ length: 12 }, (_, i) => ({
+  value: `${i + 1}`,
+  label: `Grade ${i + 1}`,
+}));
 
 interface SubmitOpportunityDialogProps {
   opportunityToEdit?: Opportunity;
@@ -80,7 +84,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
         form.reset({
           ...opportunityToEdit,
           deadline: opportunityToEdit.deadline.toDate(),
-          grades: opportunityToEdit.grades || [],
+          grades: opportunityToEdit.grades?.map(String) || [],
         });
       } else {
           form.reset({
@@ -121,6 +125,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
         ...values,
         summary,
         deadline: Timestamp.fromDate(values.deadline),
+        grades: values.grades.map(Number), // Convert back to number for Firestore
     };
 
     try {
@@ -172,7 +177,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                 <FormItem><FormLabel>Emirate</FormLabel><Select onValueChange={field.onChange} value={field.value}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Select an Emirate" /></SelectTrigger></FormControl>
                     <SelectContent>{emirates.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent>
-                </Select><FormMessage /></FormItem>
+                </Select><FormMessage /></FormMessage>
             )}/>
              <FormField control={form.control} name="deadline" render={({ field }) => (
               <FormItem className="flex flex-col"><FormLabel>Deadline</FormLabel>
@@ -197,9 +202,14 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Grades</FormLabel>
-                    <GradeSelect
-                      selectedGrades={field.value || []}
-                      onGradesChange={(newGrades) => form.setValue("grades", newGrades, { shouldValidate: true })}
+                    <MultiSelect
+                      options={gradeOptions}
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      placeholder="Select grades..."
+                      variant="inverted"
+                      animation={2}
+                      maxCount={5}
                     />
                     <FormMessage />
                   </FormItem>
