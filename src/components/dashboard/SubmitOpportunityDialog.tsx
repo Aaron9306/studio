@@ -114,7 +114,14 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
       return;
     }
 
-    const summary = await summarizeDescription({ description: values.description });
+    let summary = '';
+    try {
+        summary = await summarizeDescription({ description: values.description });
+    } catch (e) {
+        console.error("AI summary failed, using fallback.", e);
+        summary = values.description.substring(0, 100) + '...';
+    }
+
 
     const submissionData = {
         ...values,
@@ -178,7 +185,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                 <FormItem><FormLabel>Emirate</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Select an Emirate" /></SelectTrigger></FormControl>
                     <SelectContent>{emirates.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent>
-                </Select><FormMessage /></FormMessage /></FormItem>
+                </Select><FormMessage /></FormItem>
             )}/>
              <FormField control={form.control} name="deadline" render={({ field }) => (
               <FormItem className="flex flex-col"><FormLabel>Deadline</FormLabel>
