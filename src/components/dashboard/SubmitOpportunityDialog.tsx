@@ -23,6 +23,7 @@ import { Label } from '../ui/label';
 import { Timestamp } from 'firebase/firestore';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
 import { Badge } from '../ui/badge';
+import { summarizeDescription } from '@/ai/flows/summarize-flow';
 
 const gradeOptions = Array.from({ length: 12 }, (_, i) => ({
   value: i + 1,
@@ -142,7 +143,15 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="sm:max-w-[625px]">
+      <DialogContent 
+        className="sm:max-w-[625px]"
+        onInteractOutside={(e) => {
+            // Prevent closing when interacting with a popover
+            if (e.target instanceof HTMLElement && e.target.closest('[data-radix-popper-content-wrapper]')) {
+              e.preventDefault();
+            }
+        }}
+      >
         <DialogHeader>
           <DialogTitle className="font-headline">{opportunityToEdit ? 'Edit Opportunity' : 'Submit New Opportunity'}</DialogTitle>
         </DialogHeader>
@@ -170,7 +179,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                 <FormItem><FormLabel>Emirate</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Select an Emirate" /></SelectTrigger></FormControl>
                     <SelectContent>{emirates.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent>
-                </Select><FormMessage /></FormItem>
+                </Select><FormMessage /></FormMessage /></FormItem>
             )}/>
              <FormField control={form.control} name="deadline" render={({ field }) => (
               <FormItem className="flex flex-col"><FormLabel>Deadline</FormLabel>
@@ -207,6 +216,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                                             key={grade}
                                             className="flex items-center gap-1"
                                             onClick={(e) => {
+                                                e.stopPropagation();
                                                 e.preventDefault();
                                                 const newGrades = field.value.filter((g) => g !== grade);
                                                 form.setValue("grades", newGrades, { shouldValidate: true });
