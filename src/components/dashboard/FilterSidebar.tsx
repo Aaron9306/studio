@@ -149,7 +149,9 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
                             {gradeOptions.map((option) => (
                             <CommandItem
                                 key={option.value}
-                                onSelect={() => handleGradeChange(option.value)}
+                                onSelect={() => {
+                                  handleGradeChange(option.value)
+                                }}
                             >
                                 <Check className={cn("mr-2 h-4 w-4", filters.grades.includes(option.value) ? "opacity-100" : "opacity-0")} />
                                 {option.label}

@@ -113,8 +113,11 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
       return;
     }
 
+    const summary = await summarizeDescription({ description: values.description });
+
     const submissionData = {
         ...values,
+        summary,
         deadline: Timestamp.fromDate(values.deadline),
     };
 
@@ -181,7 +184,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                     </FormControl>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date()} initialFocus />
+                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date() || date < new Date("1900-01-01")} initialFocus />
                   </PopoverContent>
                 </Popover><FormMessage /></FormItem>
               )}
@@ -206,7 +209,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 const newGrades = field.value.filter((g) => g !== grade);
-                                                form.setValue("grades", newGrades);
+                                                form.setValue("grades", newGrades, { shouldValidate: true });
                                             }}
                                         >
                                         Grade {grade}
@@ -232,7 +235,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                                   const allGrades = gradeOptions.map(o => o.value);
                                   const currentGrades = field.value || [];
                                   const allSelected = allGrades.every(g => currentGrades.includes(g)) && allGrades.length === currentGrades.length;
-                                  form.setValue("grades", allSelected ? [] : allGrades)
+                                  form.setValue("grades", allSelected ? [] : allGrades, { shouldValidate: true })
                                 }}
                               >
                                 <Check className={cn("mr-2 h-4 w-4", field.value?.length === gradeOptions.length ? "opacity-100" : "opacity-0")} />
@@ -246,7 +249,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                                     const newGrades = selectedGrades.includes(option.value)
                                       ? selectedGrades.filter((g) => g !== option.value)
                                       : [...selectedGrades, option.value];
-                                    form.setValue("grades", newGrades.sort((a,b) => a-b));
+                                    form.setValue("grades", newGrades.sort((a,b) => a-b), { shouldValidate: true });
                                   }}
                                 >
                                   <Check className={cn("mr-2 h-4 w-4", field.value?.includes(option.value) ? "opacity-100" : "opacity-0")} />
