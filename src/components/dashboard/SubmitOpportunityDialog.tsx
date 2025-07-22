@@ -83,28 +83,30 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
   });
 
   useEffect(() => {
-    if (opportunityToEdit) {
-      form.reset({
-        ...opportunityToEdit,
-        deadline: opportunityToEdit.deadline.toDate(),
-        grades: opportunityToEdit.grades || [],
-      });
-    } else {
+    if (open) {
+      if (opportunityToEdit) {
         form.reset({
-            title: '',
-            type: 'Internship',
-            description: '',
-            subject: '',
-            ageRange: [16, 25],
-            grades: [],
-            price: 'Free',
-            audience: 'All Nationalities',
-            format: 'Offline',
-            deadline: new Date(),
-            emirate: 'All Emirates',
-            registrationLink: '',
-            imageUrl: '',
+          ...opportunityToEdit,
+          deadline: opportunityToEdit.deadline.toDate(),
+          grades: opportunityToEdit.grades || [],
         });
+      } else {
+          form.reset({
+              title: '',
+              type: 'Internship',
+              description: '',
+              subject: '',
+              ageRange: [16, 25],
+              grades: [],
+              price: 'Free',
+              audience: 'All Nationalities',
+              format: 'Offline',
+              deadline: new Date(),
+              emirate: 'All Emirates',
+              registrationLink: '',
+              imageUrl: '',
+          });
+      }
     }
   }, [opportunityToEdit, form, open]);
 

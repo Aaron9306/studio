@@ -41,13 +41,12 @@ export default function DashboardPage() {
         const formatMatch = filters.format === 'all' || opp.format === filters.format;
         const emirateMatch = filters.emirate === 'all' || opp.emirate === filters.emirate;
 
-        const audienceMatch = filters.audience === 'all'
-          ? opp.audience === 'All Nationalities'
-          : opp.audience === filters.audience;
+        const audienceMatch = filters.audience === 'all' || opp.audience === filters.audience;
 
         const [filterMinAge, filterMaxAge] = filters.ageRange;
         const [oppMinAge, oppMaxAge] = opp.ageRange;
-        const ageMatch = filterMinAge <= oppMaxAge && filterMaxAge >= oppMinAge;
+        // Strict age range matching: opportunity must be fully within the filter range
+        const ageMatch = oppMinAge >= filterMinAge && oppMaxAge <= filterMaxAge;
         
         const gradeMatch = filters.grades.length === 0 || (opp.grades && opp.grades.some(grade => filters.grades.includes(grade)));
         
