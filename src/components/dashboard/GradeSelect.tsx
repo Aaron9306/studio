@@ -4,12 +4,12 @@ import * as React from 'react';
 import { X, Check } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
 
 const gradeOptions = Array.from({ length: 12 }, (_, i) => ({
@@ -24,12 +24,12 @@ interface GradeSelectProps {
 }
 
 export function GradeSelect({ selectedGrades, onGradesChange, className }: GradeSelectProps) {
-  const handleSelect = (value: string) => {
-    const gradeNumber = parseInt(value, 10);
+  const [open, setOpen] = React.useState(false);
+
+  const handleSelect = (gradeNumber: number) => {
     const newSelectedGrades = selectedGrades.includes(gradeNumber)
       ? selectedGrades.filter((g) => g !== gradeNumber)
       : [...selectedGrades, gradeNumber];
-      
     onGradesChange(newSelectedGrades.sort((a, b) => a - b));
   };
 
@@ -43,27 +43,21 @@ export function GradeSelect({ selectedGrades, onGradesChange, className }: Grade
     } else {
       onGradesChange(gradeOptions.map(g => g.value));
     }
-  }
-
-  // Prevents the dropdown from closing when an item is clicked
-  const handleItemSelect = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
   };
 
-
   return (
-    <Select onValueChange={() => {}} value="">
-      <SelectTrigger
-        className={cn(
-          'h-auto min-h-10 w-full justify-between',
-          className
-        )}
-      >
-        <SelectValue asChild>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className={cn('w-full justify-between h-auto min-h-10', className)}
+          onClick={() => setOpen(!open)}
+        >
           <div className="flex flex-wrap gap-1">
             {selectedGrades.length === 0 ? (
-              <span className="text-muted-foreground">Select grades...</span>
+              <span className="text-muted-foreground font-normal">Select grades...</span>
             ) : (
               selectedGrades.map((grade) => (
                 <Badge
@@ -82,33 +76,53 @@ export function GradeSelect({ selectedGrades, onGradesChange, className }: Grade
               ))
             )}
           </div>
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-         <div 
-            className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-            onClick={handleSelectAll}
-            onMouseDown={handleItemSelect}
-        >
-            <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
-                 {selectedGrades.length === gradeOptions.length && <Check className="h-4 w-4" />}
-            </span>
-             All Grades
-        </div>
-        {gradeOptions.map((option) => (
-          <div 
-            key={option.value}
-            className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-            onClick={() => handleSelect(String(option.value))}
-            onMouseDown={handleItemSelect}
-          >
-             <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
-                {selectedGrades.includes(option.value) && <Check className="h-4 w-4" />}
-             </span>
-             {option.label}
-          </div>
-        ))}
-      </SelectContent>
-    </Select>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+        <Command>
+          <CommandInput placeholder="Search grades..." />
+          <CommandList>
+            <CommandEmpty>No grades found.</CommandEmpty>
+            <CommandGroup>
+               <CommandItem
+                onSelect={handleSelectAll}
+                className="cursor-pointer"
+              >
+                <div
+                  className={cn(
+                    'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+                    selectedGrades.length === gradeOptions.length
+                      ? 'bg-primary text-primary-foreground'
+                      : 'opacity-50 [&_svg]:invisible'
+                  )}
+                >
+                  <Check className={cn('h-4 w-4')} />
+                </div>
+                All Grades
+              </CommandItem>
+              {gradeOptions.map((option) => (
+                <CommandItem
+                  key={option.value}
+                  onSelect={() => handleSelect(option.value)}
+                  className="cursor-pointer"
+                >
+                  <div
+                    className={cn(
+                      'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+                      selectedGrades.includes(option.value)
+                        ? 'bg-primary text-primary-foreground'
+                        : 'opacity-50 [&_svg]:invisible'
+                    )}
+                  >
+                    <Check className={cn('h-4 w-4')} />
+                  </div>
+                  {option.label}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }

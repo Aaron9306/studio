@@ -163,13 +163,13 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                 <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea placeholder="Detailed description of the opportunity..." {...field} /></FormControl><FormMessage /></FormItem>
             )}/>
              <FormField control={form.control} name="subject" render={({ field }) => (
-                <FormItem><FormLabel>Subject/Category</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormItem><FormLabel>Subject/Category</FormLabel><Select onValueChange={field.onChange} value={field.value}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Select a subject" /></SelectTrigger></FormControl>
                     <SelectContent>{subjects.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                 </Select><FormMessage /></FormItem>
             )}/>
             <FormField control={form.control} name="emirate" render={({ field }) => (
-                <FormItem><FormLabel>Emirate</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormItem><FormLabel>Emirate</FormLabel><Select onValueChange={field.onChange} value={field.value}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Select an Emirate" /></SelectTrigger></FormControl>
                     <SelectContent>{emirates.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent>
                 </Select><FormMessage /></FormItem>
@@ -207,20 +207,20 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
             />
             <div className="grid grid-cols-2 gap-4">
                 <FormField control={form.control} name="price" render={({ field }) => (
-                    <FormItem><FormLabel>Price</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex space-x-4 pt-2">
+                    <FormItem><FormLabel>Price</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} value={field.value} className="flex space-x-4 pt-2">
                         <FormItem className="flex items-center space-x-2"><FormControl><RadioGroupItem value="Free" id="price-free" /></FormControl><Label htmlFor="price-free" className="font-normal">Free</Label></FormItem>
                         <FormItem className="flex items-center space-x-2"><FormControl><RadioGroupItem value="Paid" id="price-paid" /></FormControl><Label htmlFor="price-paid" className="font-normal">Paid</Label></FormItem>
                     </RadioGroup></FormControl><FormMessage /></FormItem>
                 )}/>
                 <FormField control={form.control} name="format" render={({ field }) => (
-                    <FormItem><FormLabel>Format</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex space-x-4 pt-2">
+                    <FormItem><FormLabel>Format</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} value={field.value} className="flex space-x-4 pt-2">
                         <FormItem className="flex items-center space-x-2"><FormControl><RadioGroupItem value="Online" id="format-online" /></FormControl><Label htmlFor="format-online" className="font-normal">Online</Label></FormItem>
                         <FormItem className="flex items-center space-x-2"><FormControl><RadioGroupItem value="Offline" id="format-offline" /></FormControl><Label htmlFor="format-offline" className="font-normal">Offline</Label></FormItem>
                     </RadioGroup></FormControl><FormMessage /></FormItem>
                 )}/>
             </div>
              <FormField control={form.control} name="audience" render={({ field }) => (
-                <FormItem><FormLabel>Audience</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex space-x-4 pt-2">
+                <FormItem><FormLabel>Audience</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} value={field.value} className="flex space-x-4 pt-2">
                     <FormItem className="flex items-center space-x-2"><FormControl><RadioGroupItem value="All Nationalities" id="aud-all" /></FormControl><Label htmlFor="aud-all" className="font-normal">All Nationalities</Label></FormItem>
                     <FormItem className="flex items-center space-x-2"><FormControl><RadioGroupItem value="Emiratis Only" id="aud-emirati" /></FormControl><Label htmlFor="aud-emirati" className="font-normal">Emiratis Only</Label></FormItem>
                 </RadioGroup></FormControl><FormMessage /></FormItem>

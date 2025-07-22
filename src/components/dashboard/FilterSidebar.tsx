@@ -12,7 +12,6 @@ import React, { Dispatch, SetStateAction } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ScrollArea } from '../ui/scroll-area';
 import { Emirate } from '@/lib/types';
-import { Badge } from '../ui/badge';
 import { GradeSelect } from './GradeSelect';
 
 
