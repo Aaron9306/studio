@@ -40,13 +40,12 @@ export default function DashboardPage() {
         const priceMatch = filters.price === 'all' || opp.price === filters.price;
         const formatMatch = filters.format === 'all' || opp.format === filters.format;
         const emirateMatch = filters.emirate === 'all' || opp.emirate === filters.emirate;
-
         const audienceMatch = filters.audience === 'all' || opp.audience === filters.audience;
 
         const [filterMinAge, filterMaxAge] = filters.ageRange;
         const [oppMinAge, oppMaxAge] = opp.ageRange;
-        // Strict age range matching: opportunity must be fully within the filter range
-        const ageMatch = oppMinAge >= filterMinAge && oppMaxAge <= filterMaxAge;
+        // Corrected Overlap Logic: Show if any part of the opportunity's age range is within the filter's range.
+        const ageMatch = Math.max(filterMinAge, oppMinAge) <= Math.min(filterMaxAge, oppMaxAge);
         
         const gradeMatch = filters.grades.length === 0 || (opp.grades && opp.grades.some(grade => filters.grades.includes(grade)));
         
