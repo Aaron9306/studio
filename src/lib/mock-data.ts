@@ -1,4 +1,8 @@
-import type { User, Opportunity } from './types';
+import { User, Opportunity } from './types';
+import { Timestamp } from 'firebase/firestore';
+
+// This file is now deprecated in favor of Firestore,
+// but can be kept for reference or seeding a new database.
 
 export const mockUsers: User[] = [
   {
@@ -17,6 +21,8 @@ export const mockUsers: User[] = [
   },
 ];
 
+const toTimestamp = (date: Date) => Timestamp.fromDate(date);
+
 export const mockOpportunities: Opportunity[] = [
   {
     id: 'opp-1',
@@ -28,11 +34,12 @@ export const mockOpportunities: Opportunity[] = [
     price: 'Free',
     audience: 'All Nationalities',
     format: 'Offline',
-    deadline: new Date('2024-10-15'),
+    deadline: toTimestamp(new Date('2024-10-15')),
     registrationLink: 'https://example.com/hackathon',
     imageUrl: 'https://placehold.co/600x400.png',
     status: 'approved',
     submittedBy: 'admin-1',
+    createdAt: toTimestamp(new Date('2024-07-01')),
   },
   {
     id: 'opp-2',
@@ -44,71 +51,10 @@ export const mockOpportunities: Opportunity[] = [
     price: 'Free',
     audience: 'All Nationalities',
     format: 'Offline',
-    deadline: new Date('2024-09-30'),
+    deadline: toTimestamp(new Date('2024-09-30')),
     imageUrl: 'https://placehold.co/600x400.png',
     status: 'approved',
     submittedBy: 'admin-1',
-  },
-  {
-    id: 'opp-3',
-    title: 'Web Development Bootcamp',
-    type: 'Summer Camp',
-    description: 'A 6-week intensive bootcamp covering HTML, CSS, JavaScript, and React. Build a portfolio of projects and kickstart your career in web development.',
-    subject: 'Technology',
-    ageRange: [17, 25],
-    price: 'Paid',
-    audience: 'All Nationalities',
-    format: 'Online',
-    deadline: new Date('2024-08-20'),
-    registrationLink: 'https://example.com/bootcamp',
-    imageUrl: 'https://placehold.co/600x400.png',
-    status: 'approved',
-    submittedBy: 'user-1',
-  },
-  {
-    id: 'opp-4',
-    title: 'Marketing Internship at a Global Agency',
-    type: 'Internship',
-    description: 'A 3-month paid internship for aspiring marketers. Work on real client campaigns, learn about digital strategy, and get mentored by industry experts.',
-    subject: 'Business',
-    ageRange: [18, 24],
-    price: 'Paid',
-    audience: 'All Nationalities',
-    format: 'Offline',
-    deadline: new Date('2024-11-01'),
-    imageUrl: 'https://placehold.co/600x400.png',
-    status: 'approved',
-    submittedBy: 'admin-1',
-  },
-  {
-    id: 'opp-5',
-    title: 'Model United Nations Dubai',
-    type: 'MUN',
-    description: 'Represent a country and debate pressing global issues. Sharpen your public speaking, negotiation, and research skills.',
-    subject: 'Politics',
-    ageRange: [14, 19],
-    price: 'Paid',
-    audience: 'All Nationalities',
-    format: 'Offline',
-    deadline: new Date('2024-10-10'),
-    registrationLink: 'https://example.com/mun',
-    imageUrl: 'https://placehold.co/600x400.png',
-    status: 'pending',
-    submittedBy: 'user-1',
-  },
-   {
-    id: 'opp-6',
-    title: 'National Emirati Innovators Competition',
-    type: 'Competition',
-    description: 'A prestigious competition for young Emirati innovators to showcase their projects in science and technology. Sponsored by the Ministry of Education.',
-    subject: 'Science',
-    ageRange: [15, 21],
-    price: 'Free',
-    audience: 'Emiratis Only',
-    format: 'Offline',
-    deadline: new Date('2024-12-01'),
-    imageUrl: 'https://placehold.co/600x400.png',
-    status: 'approved',
-    submittedBy: 'admin-1',
+    createdAt: toTimestamp(new Date('2024-07-02')),
   },
 ];

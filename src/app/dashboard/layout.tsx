@@ -1,5 +1,6 @@
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 export default function DashboardLayout({
   children,
@@ -10,7 +11,10 @@ export default function DashboardLayout({
     <ProtectedRoute allowedRoles={['student', 'admin']}>
       <div className="flex flex-col min-h-screen">
         <Header />
-        {children}
+        <div className="flex-grow flex">
+          {children}
+        </div>
+        <Footer/>
       </div>
     </ProtectedRoute>
   )

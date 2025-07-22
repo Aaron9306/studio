@@ -12,14 +12,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { useOpportunities } from '@/contexts/OpportunityContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Opportunity, OpportunityAudience, OpportunityFormat, OpportunityPrice, OpportunityType } from '@/lib/types';
+import { Opportunity, OpportunityType } from '@/lib/types';
 import { useEffect, useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
+import { format as formatDate } from 'date-fns';
 import { Calendar } from '../ui/calendar';
 import { Label } from '../ui/label';
+import { Timestamp } from 'firebase/firestore';
 
 const opportunitySchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.'),
@@ -71,31 +72,52 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
     if (opportunityToEdit) {
       form.reset({
         ...opportunityToEdit,
-        ageRange: [opportunityToEdit.ageRange[0], opportunityToEdit.ageRange[1]],
+        deadline: opportunityToEdit.deadline.toDate(),
       });
     } else {
-        form.reset();
+        form.reset({
+            title: '',
+            type: 'Internship',
+            description: '',
+            subject: '',
+            ageRange: [16, 25],
+            price: 'Free',
+            audience: 'All Nationalities',
+            format: 'Offline',
+            deadline: new Date(),
+            registrationLink: '',
+            imageUrl: '',
+        });
     }
   }, [opportunityToEdit, form, open]);
 
 
-  const onSubmit = (values: z.infer<typeof opportunitySchema>) => {
+  const onSubmit = async (values: z.infer<typeof opportunitySchema>) => {
     if (!user) {
       toast({ variant: 'destructive', title: 'You must be logged in.' });
       return;
     }
 
-    if (opportunityToEdit) {
-      updateOpportunity(opportunityToEdit.id, {...values, submittedBy: user.id});
-      toast({ title: 'Opportunity Updated', description: 'Your changes have been submitted for review.' });
-    } else {
-      addOpportunity({ ...values, submittedBy: user.id });
-      toast({ title: 'Opportunity Submitted', description: 'Thank you! Your submission is pending review.' });
+    const submissionData = {
+        ...values,
+        deadline: Timestamp.fromDate(values.deadline),
+    };
+
+    try {
+      if (opportunityToEdit) {
+        await updateOpportunity(opportunityToEdit.id, submissionData);
+        toast({ title: 'Opportunity Updated', description: 'Your changes have been submitted for review.' });
+      } else {
+        await addOpportunity(submissionData);
+        toast({ title: 'Opportunity Submitted', description: 'Thank you! Your submission is pending review.' });
+      }
+      
+      form.reset();
+      setOpen(false);
+      onSuccess?.();
+    } catch(e) {
+        toast({ variant: 'destructive', title: 'Submission failed', description: 'Could not save the opportunity. Please try again.'})
     }
-    
-    form.reset();
-    setOpen(false);
-    onSuccess?.();
   };
 
   return (
@@ -131,7 +153,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                        {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                        {field.value ? formatDate(field.value, "PPP") : <span>Pick a date</span>}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
                     </FormControl>
@@ -139,9 +161,9 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date()} initialFocus />
                   </PopoverContent>
-                </Popover><FormMessage />
-              </FormItem>
-            )}/>
+                </Popover><FormMessage /></FormItem>
+              )}
+            />
             <div className="grid grid-cols-2 gap-4">
                 <FormField control={form.control} name="price" render={({ field }) => (
                     <FormItem><FormLabel>Price</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex space-x-4 pt-2">
@@ -170,7 +192,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
             )}/>
             <DialogFooter className="pt-4 pr-4">
               <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
-              <Button type="submit">{opportunityToEdit ? 'Save Changes' : 'Submit for Review'}</Button>
+              <Button type="submit" disabled={form.formState.isSubmitting}>{form.formState.isSubmitting ? 'Submitting...' : (opportunityToEdit ? 'Save Changes' : 'Submit for Review')}</Button>
             </DialogFooter>
           </form>
         </Form>

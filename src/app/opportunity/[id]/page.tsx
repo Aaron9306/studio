@@ -8,19 +8,42 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Bookmark, Calendar, Globe, Tag, Users, Wallet, Clock, User, ExternalLink, Edit } from "lucide-react";
-import { format } from 'date-fns';
+import { format as formatDate } from 'date-fns';
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import Header from "@/components/Header";
 import { SubmitOpportunityDialog } from "@/components/dashboard/SubmitOpportunityDialog";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function OpportunityDetailPage() {
   const params = useParams();
-  const { getOpportunityById } = useOpportunities();
-  const { user, toggleBookmark, loading } = useAuth();
+  const { getOpportunityById, loading: oppsLoading } = useOpportunities();
+  const { user, toggleBookmark, loading: authLoading } = useAuth();
 
   const opportunity = getOpportunityById(params.id as string);
+
+  if (oppsLoading || authLoading) {
+    return (
+        <ProtectedRoute allowedRoles={['student', 'admin']}>
+            <Header />
+            <div className="container mx-auto px-4 py-8">
+                <Skeleton className="w-full h-96 rounded-lg mb-8" />
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="lg:col-span-2 space-y-4">
+                        <Skeleton className="h-8 w-1/2" />
+                        <Skeleton className="h-24 w-full" />
+                    </div>
+                    <div className="space-y-6">
+                        <Skeleton className="h-48 w-full" />
+                        <Skeleton className="h-12 w-full" />
+                        <Skeleton className="h-12 w-full" />
+                    </div>
+                </div>
+            </div>
+        </ProtectedRoute>
+    )
+  }
 
   if (!opportunity) {
     return (
@@ -54,7 +77,7 @@ export default function OpportunityDetailPage() {
     { icon: Users, label: 'Age Range', value: `${opportunity.ageRange[0]} - ${opportunity.ageRange[1]}` },
     { icon: Wallet, label: 'Price', value: opportunity.price },
     { icon: User, label: 'Format', value: opportunity.format },
-    { icon: Clock, label: 'Deadline', value: format(opportunity.deadline, 'PPP') },
+    { icon: Clock, label: 'Deadline', value: formatDate(opportunity.deadline.toDate(), 'PPP') },
   ];
 
   return (
@@ -105,7 +128,7 @@ export default function OpportunityDetailPage() {
                     variant="outline" 
                     size="lg" 
                     onClick={() => toggleBookmark(opportunity.id)}
-                    disabled={loading}
+                    disabled={authLoading}
                   >
                     <Bookmark className={cn("mr-2 h-5 w-5", isBookmarked && 'text-primary fill-primary')} />
                     {isBookmarked ? 'Saved' : 'Save for Later'}

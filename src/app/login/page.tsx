@@ -36,9 +36,8 @@ export default function LoginPage() {
   }, [user, router]);
 
 
-  const onSubmit = (values: z.infer<typeof loginSchema>) => {
-    // Password is not checked in this mock implementation
-    const success = login(values.email);
+  const onSubmit = async (values: z.infer<typeof loginSchema>) => {
+    const success = await login(values.email, values.password);
     if (success) {
       toast({
         title: 'Login Successful',

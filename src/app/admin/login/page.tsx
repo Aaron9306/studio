@@ -36,8 +36,8 @@ export default function AdminLoginPage() {
   }, [user, router]);
 
 
-  const onSubmit = (values: z.infer<typeof loginSchema>) => {
-    const success = adminLogin(values.email);
+  const onSubmit = async (values: z.infer<typeof loginSchema>) => {
+    const success = await adminLogin(values.email, values.password);
     if (success) {
       toast({
         title: 'Admin Login Successful',
@@ -47,7 +47,7 @@ export default function AdminLoginPage() {
       toast({
         variant: 'destructive',
         title: 'Login Failed',
-        description: 'Invalid credentials for admin access.',
+        description: 'Invalid credentials or you do not have admin access.',
       });
        form.setError('password', { message: 'Invalid credentials' });
     }

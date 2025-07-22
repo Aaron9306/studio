@@ -9,11 +9,12 @@ import { SubmitOpportunityDialog } from '@/components/dashboard/SubmitOpportunit
 import { useAuth } from '@/contexts/AuthContext';
 import { Opportunity } from '@/lib/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { addDays, addMonths, endOfWeek } from 'date-fns';
+import { addMonths, endOfWeek } from 'date-fns';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DashboardPage() {
-  const { opportunities } = useOpportunities();
-  const { user } = useAuth();
+  const { opportunities, loading: oppsLoading } = useOpportunities();
+  const { user, loading: authLoading } = useAuth();
   const [filters, setFilters] = useState<Filters>({
     search: '',
     types: [],
@@ -24,6 +25,8 @@ export default function DashboardPage() {
     age: 30,
     deadline: 'all',
   });
+
+  const loading = oppsLoading || authLoading;
 
   const filteredOpportunities = useMemo(() => {
     return opportunities
@@ -37,7 +40,7 @@ export default function DashboardPage() {
         const formatMatch = filters.format === 'all' || opp.format === filters.format;
         const ageMatch = filters.age >= opp.ageRange[0] && filters.age <= opp.ageRange[1];
         
-        const deadlineDate = new Date(opp.deadline);
+        const deadlineDate = opp.deadline.toDate();
         const now = new Date();
         let deadlineMatch = true;
         if (filters.deadline === 'week') {
@@ -77,10 +80,10 @@ export default function DashboardPage() {
             />
           </div>
           <TabsContent value="all">
-             <OpportunityGrid opportunities={filteredOpportunities} />
+             <OpportunityGrid opportunities={filteredOpportunities} loading={loading} />
           </TabsContent>
           <TabsContent value="bookmarked">
-             <OpportunityGrid opportunities={bookmarkedOpportunities} emptyMessage="You haven't saved any opportunities yet. Click the bookmark icon to save one." />
+             <OpportunityGrid opportunities={bookmarkedOpportunities} loading={loading} emptyMessage="You haven't saved any opportunities yet. Click the bookmark icon to save one." />
           </TabsContent>
         </Tabs>
       </main>
@@ -88,7 +91,21 @@ export default function DashboardPage() {
   );
 }
 
-function OpportunityGrid({ opportunities, emptyMessage }: { opportunities: Opportunity[], emptyMessage?: string }) {
+function OpportunityGrid({ opportunities, loading, emptyMessage }: { opportunities: Opportunity[], loading: boolean, emptyMessage?: string }) {
+  if (loading) {
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="space-y-4">
+                    <Skeleton className="h-48 w-full" />
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-12 w-full" />
+                </div>
+            ))}
+        </div>
+    )
+  }
+  
   if (opportunities.length === 0) {
     return (
       <div className="text-center py-20">

@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 export type OpportunityType = 'MUN' | 'Internship' | 'Volunteering' | 'Competition' | 'Summer Camp' | 'Hackathon';
 export type OpportunityAudience = 'All Nationalities' | 'Emiratis Only';
 export type OpportunityFormat = 'Online' | 'Offline';
@@ -14,11 +16,12 @@ export interface Opportunity {
   price: OpportunityPrice;
   audience: OpportunityAudience;
   format: OpportunityFormat;
-  deadline: Date;
+  deadline: Timestamp;
   registrationLink?: string;
   imageUrl?: string;
   status: OpportunityStatus;
   submittedBy: string; // user id
+  createdAt: Timestamp;
 }
 
 export interface User {

@@ -8,11 +8,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Card, CardContent } from "../ui/card";
 import { Opportunity } from "@/lib/types";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
-import { format } from "date-fns";
+import { format as formatDate } from "date-fns";
 import { Check, Edit, Trash, X } from "lucide-react";
 import { SubmitOpportunityDialog } from "../dashboard/SubmitOpportunityDialog";
 import Link from "next/link";
@@ -27,14 +27,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { useOpportunities } from "@/contexts/OpportunityContext";
 
 interface OpportunitiesTableProps {
   opportunities: Opportunity[];
-  onStatusChange: (id: string, status: 'approved' | 'rejected') => void;
   type: 'pending' | 'approved';
 }
 
-export function OpportunitiesTable({ opportunities, onStatusChange, type }: OpportunitiesTableProps) {
+export function OpportunitiesTable({ opportunities, type }: OpportunitiesTableProps) {
+    const { updateOpportunityStatus, deleteOpportunity } = useOpportunities();
   if (opportunities.length === 0) {
     return (
       <Card>
@@ -45,6 +46,14 @@ export function OpportunitiesTable({ opportunities, onStatusChange, type }: Oppo
     );
   }
 
+  const handleStatusChange = (id: string, status: 'approved' | 'rejected') => {
+    if (status === 'rejected') {
+      deleteOpportunity(id);
+    } else {
+      updateOpportunityStatus(id, status);
+    }
+  };
+
   return (
     <Card>
         <CardContent className="p-0">
@@ -53,7 +62,7 @@ export function OpportunitiesTable({ opportunities, onStatusChange, type }: Oppo
               <TableRow>
                 <TableHead>Title</TableHead>
                 <TableHead>Type</TableHead>
-                <TableHead>Submitted On</TableHead>
+                <TableHead>Deadline</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -66,14 +75,14 @@ export function OpportunitiesTable({ opportunities, onStatusChange, type }: Oppo
                     </Link>
                   </TableCell>
                   <TableCell><Badge variant="outline">{opp.type}</Badge></TableCell>
-                  <TableCell>{format(new Date(opp.deadline), 'dd MMM yyyy')}</TableCell>
+                  <TableCell>{formatDate(opp.deadline.toDate(), 'dd MMM yyyy')}</TableCell>
                   <TableCell className="text-right space-x-2">
                     {type === 'pending' && (
                         <>
-                        <Button variant="outline" size="icon" className="text-green-600" onClick={() => onStatusChange(opp.id, 'approved')}>
+                        <Button variant="outline" size="icon" className="text-green-600" onClick={() => handleStatusChange(opp.id, 'approved')}>
                             <Check className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="icon" className="text-red-600" onClick={() => onStatusChange(opp.id, 'rejected')}>
+                        <Button variant="outline" size="icon" className="text-red-600" onClick={() => handleStatusChange(opp.id, 'rejected')}>
                             <X className="h-4 w-4" />
                         </Button>
                         </>
@@ -101,7 +110,7 @@ export function OpportunitiesTable({ opportunities, onStatusChange, type }: Oppo
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => onStatusChange(opp.id, 'rejected')}>Delete</AlertDialogAction>
+                            <AlertDialogAction onClick={() => deleteOpportunity(opp.id)}>Delete</AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>

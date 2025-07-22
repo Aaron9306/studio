@@ -7,20 +7,29 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { FilePlus } from "lucide-react";
 import { SubmitOpportunityDialog } from "../dashboard/SubmitOpportunityDialog";
+import { Skeleton } from "../ui/skeleton";
 
 export default function AdminDashboardClient() {
-  const { opportunities, updateOpportunityStatus, deleteOpportunity } = useOpportunities();
+  const { opportunities, loading } = useOpportunities();
 
   const pendingOpportunities = opportunities.filter(o => o.status === 'pending');
   const approvedOpportunities = opportunities.filter(o => o.status === 'approved');
 
-  const handleStatusChange = (id: string, status: 'approved' | 'rejected') => {
-    if (status === 'rejected') {
-      deleteOpportunity(id);
-    } else {
-      updateOpportunityStatus(id, status);
-    }
-  };
+  if (loading) {
+      return (
+          <div>
+              <div className="flex justify-end mb-4">
+                  <Skeleton className="h-10 w-48" />
+              </div>
+              <Skeleton className="h-10 w-full mb-2" />
+              <Card>
+                  <CardContent className="p-10 text-center text-muted-foreground">
+                      <Skeleton className="h-40 w-full" />
+                  </CardContent>
+              </Card>
+          </div>
+      )
+  }
 
   return (
     <div>
@@ -47,14 +56,12 @@ export default function AdminDashboardClient() {
         <TabsContent value="pending">
           <OpportunitiesTable 
             opportunities={pendingOpportunities} 
-            onStatusChange={handleStatusChange}
             type="pending"
           />
         </TabsContent>
         <TabsContent value="approved">
            <OpportunitiesTable 
             opportunities={approvedOpportunities} 
-            onStatusChange={handleStatusChange}
             type="approved"
           />
         </TabsContent>

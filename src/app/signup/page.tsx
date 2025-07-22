@@ -37,8 +37,8 @@ export default function SignupPage() {
     }
   }, [user, router]);
 
-  const onSubmit = (values: z.infer<typeof signupSchema>) => {
-    const success = signup(values.name, values.email);
+  const onSubmit = async (values: z.infer<typeof signupSchema>) => {
+    const success = await signup(values.name, values.email, values.password);
     if (success) {
       toast({
         title: 'Account Created',

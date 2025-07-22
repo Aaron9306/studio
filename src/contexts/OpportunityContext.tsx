@@ -1,53 +1,87 @@
 'use client';
 import type { Opportunity, OpportunityStatus } from '@/lib/types';
-import { mockOpportunities } from '@/lib/mock-data';
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { db } from '@/lib/firebase';
+import { 
+  collection, 
+  onSnapshot, 
+  addDoc, 
+  updateDoc, 
+  deleteDoc, 
+  doc, 
+  serverTimestamp,
+  query,
+  orderBy
+} from 'firebase/firestore';
+import { useAuth } from './AuthContext';
 
 interface OpportunityContextType {
   opportunities: Opportunity[];
   getOpportunityById: (id: string) => Opportunity | undefined;
-  addOpportunity: (opportunity: Omit<Opportunity, 'id' | 'status'>) => void;
-  updateOpportunityStatus: (id: string, status: OpportunityStatus) => void;
-  updateOpportunity: (id: string, updatedOpportunity: Partial<Opportunity>) => void;
-  deleteOpportunity: (id: string) => void;
+  addOpportunity: (opportunity: Omit<Opportunity, 'id' | 'status' | 'createdAt'>) => Promise<void>;
+  updateOpportunityStatus: (id: string, status: OpportunityStatus) => Promise<void>;
+  updateOpportunity: (id: string, updatedOpportunity: Partial<Omit<Opportunity, 'id' | 'status' | 'createdAt'>>) => Promise<void>;
+  deleteOpportunity: (id: string) => Promise<void>;
+  loading: boolean;
 }
 
 const OpportunityContext = createContext<OpportunityContextType | undefined>(undefined);
 
 export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
-  const [opportunities, setOpportunities] = useState<Opportunity[]>(mockOpportunities);
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    setLoading(true);
+    const q = query(collection(db, 'opportunities'), orderBy('createdAt', 'desc'));
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const opportunitiesData: Opportunity[] = [];
+      querySnapshot.forEach((doc) => {
+        opportunitiesData.push({ id: doc.id, ...doc.data() } as Opportunity);
+      });
+      setOpportunities(opportunitiesData);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const getOpportunityById = (id: string) => {
     return opportunities.find(opp => opp.id === id);
   };
 
-  const addOpportunity = (opportunityData: Omit<Opportunity, 'id' | 'status'>) => {
-    const newOpportunity: Opportunity = {
+  const addOpportunity = async (opportunityData: Omit<Opportunity, 'id' | 'status'| 'createdAt'>) => {
+    if (!user) throw new Error("User not authenticated");
+    await addDoc(collection(db, 'opportunities'), {
       ...opportunityData,
-      id: `opp-${Date.now()}`,
       status: 'pending',
-    };
-    setOpportunities(prev => [newOpportunity, ...prev]);
+      submittedBy: user.id,
+      createdAt: serverTimestamp()
+    });
   };
   
-  const updateOpportunity = (id: string, updatedData: Partial<Opportunity>) => {
-    setOpportunities(prev =>
-      prev.map(opp => (opp.id === id ? { ...opp, ...updatedData, status: 'pending' } : opp))
-    );
+  const updateOpportunity = async (id: string, updatedData: Partial<Omit<Opportunity, 'id' | 'status' | 'createdAt'>>) => {
+    const oppDocRef = doc(db, 'opportunities', id);
+    await updateDoc(oppDocRef, {
+        ...updatedData,
+        status: 'pending'
+    });
   };
 
-  const updateOpportunityStatus = (id:string, status: OpportunityStatus) => {
-    setOpportunities(prev => 
-      prev.map(opp => opp.id === id ? {...opp, status} : opp)
-    );
+  const updateOpportunityStatus = async (id:string, status: OpportunityStatus) => {
+    const oppDocRef = doc(db, 'opportunities', id);
+    await updateDoc(oppDocRef, { status });
   }
 
-  const deleteOpportunity = (id: string) => {
-    setOpportunities(prev => prev.filter(opp => opp.id !== id));
+  const deleteOpportunity = async (id: string) => {
+    const oppDocRef = doc(db, 'opportunities', id);
+    await deleteDoc(oppDocRef);
   };
 
   return (
-    <OpportunityContext.Provider value={{ opportunities, getOpportunityById, addOpportunity, updateOpportunityStatus, updateOpportunity, deleteOpportunity }}>
+    <OpportunityContext.Provider value={{ opportunities, getOpportunityById, addOpportunity, updateOpportunityStatus, updateOpportunity, deleteOpportunity, loading }}>
       {children}
     </OpportunityContext.Provider>
   );
