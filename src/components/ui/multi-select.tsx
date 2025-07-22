@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/command';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger, PopoverPortal } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 
 const multiSelectVariants = cva(
@@ -185,63 +185,58 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start"
-          onEscapeKeyDown={() => setIsPopoverOpen(false)}
-        >
-          <Command>
-            <CommandInput
-              placeholder="Search..."
-              onKeyDown={handleInputKeyDown}
-              onValueChange={setInputValue}
-            />
-             <CommandList>
-              <CommandEmpty>No results found.</CommandEmpty>
-               {inputValue === '' && (
-                <CommandGroup heading="Actions" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground">
-                    <CommandItem
-                        onSelect={handleSelectAll}
-                        className="cursor-pointer"
-                    >
+        <PopoverPortal>
+            <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start"
+            onEscapeKeyDown={() => setIsPopoverOpen(false)}
+            >
+            <Command>
+                <CommandInput
+                placeholder="Search..."
+                onKeyDown={handleInputKeyDown}
+                onValueChange={setInputValue}
+                />
+                <CommandList>
+                <CommandEmpty>No results found.</CommandEmpty>
+                <CommandGroup>
+                    <CommandItem onSelect={handleSelectAll} className="cursor-pointer">
                         Select All
                     </CommandItem>
-                    <CommandItem
-                        onSelect={handleDeselectAll}
-                        className="cursor-pointer"
-                    >
-                       Deselect All
+                    <CommandItem onSelect={handleDeselectAll} className="cursor-pointer">
+                        Deselect All
                     </CommandItem>
                 </CommandGroup>
-               )}
-              <CommandGroup className="h-full overflow-auto">
-                {filteredOptions.map((option) => {
-                  const isSelected = selectedValues.includes(option.value);
-                  return (
-                    <CommandItem
-                      key={option.value}
-                      onSelect={() => toggleOption(option.value)}
-                      className="cursor-pointer flex items-center justify-between"
-                    >
-                      <div className="flex items-center">
-                        {option.icon && <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
-                        <span>{option.label}</span>
-                      </div>
-                      <div
-                        className={cn(
-                          'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                          isSelected
-                            ? 'bg-primary text-primary-foreground'
-                            : 'opacity-50 [&_svg]:invisible',
-                        )}
-                      >
-                        <CheckIcon className="h-4 w-4" />
-                      </div>
-                    </CommandItem>
-                  );
-                })}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
+                <CommandSeparator />
+                <CommandGroup className="h-full overflow-auto">
+                    {options.map((option) => {
+                    const isSelected = selectedValues.includes(option.value);
+                    return (
+                        <CommandItem
+                        key={option.value}
+                        onSelect={() => toggleOption(option.value)}
+                        className="cursor-pointer flex items-center justify-between"
+                        >
+                        <div className="flex items-center">
+                            {option.icon && <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
+                            <span>{option.label}</span>
+                        </div>
+                        <div
+                            className={cn(
+                            'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+                            isSelected
+                                ? 'bg-primary text-primary-foreground'
+                                : 'opacity-50 [&_svg]:invisible',
+                            )}
+                        >
+                            <CheckIcon className="h-4 w-4" />
+                        </div>
+                        </CommandItem>
+                    );
+                    })}
+                </CommandGroup>
+                </CommandList>
+            </Command>
+            </PopoverContent>
+        </PopoverPortal>
       </Popover>
     );
   },
