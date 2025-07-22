@@ -1,3 +1,4 @@
+
 'use client';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -7,12 +8,12 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Filter, X } from 'lucide-react';
-import React, { Dispatch, SetStateAction } from 'react';
+import { Filter, X, PlusCircle, Trash2 } from 'lucide-react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ScrollArea } from '../ui/scroll-area';
 import { Emirate } from '@/lib/types';
-import { MultiSelect } from '../ui/multi-select';
+import { Badge } from '../ui/badge';
 
 export interface Filters {
   search: string;
@@ -39,6 +40,55 @@ const gradeOptions = Array.from({ length: 12 }, (_, i) => ({
   value: `${i + 1}`,
   label: `Grade ${i + 1}`,
 }));
+
+function GradeFilter({ selectedGrades, onChange }: { selectedGrades: string[], onChange: (grades: string[]) => void }) {
+  const [currentGrade, setCurrentGrade] = useState('');
+
+  const handleAddGrade = () => {
+    if (currentGrade && !selectedGrades.includes(currentGrade)) {
+      const newGrades = [...selectedGrades, currentGrade].sort((a,b) => parseInt(a,10) - parseInt(b,10));
+      onChange(newGrades);
+      setCurrentGrade('');
+    }
+  };
+
+  const handleRemoveGrade = (gradeToRemove: string) => {
+    onChange(selectedGrades.filter(g => g !== gradeToRemove));
+  };
+
+  return (
+    <div>
+        <Label>Grades</Label>
+         <div className="flex items-center gap-2 mt-2">
+            <Select value={currentGrade} onValueChange={setCurrentGrade}>
+                <SelectTrigger>
+                    <SelectValue placeholder="Select a grade" />
+                </SelectTrigger>
+                <SelectContent>
+                    {gradeOptions.map(option => (
+                        <SelectItem key={option.value} value={option.value} disabled={selectedGrades.includes(option.value)}>
+                            {option.label}
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+            <Button type="button" variant="outline" size="icon" onClick={handleAddGrade} disabled={!currentGrade}>
+                <PlusCircle className="h-4 w-4" />
+            </Button>
+        </div>
+        <div className="flex flex-wrap gap-1 pt-2">
+            {selectedGrades.map(grade => (
+                <Badge key={grade} variant="secondary" className="font-normal">
+                    Grade {grade}
+                    <button type="button" className="ml-1.5" onClick={() => handleRemoveGrade(grade)}>
+                        <X className="h-3 w-3" />
+                    </button>
+                </Badge>
+            ))}
+        </div>
+    </div>
+  )
+}
 
 export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
   const isMobile = useIsMobile();
@@ -113,18 +163,8 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
           </div>
           <Separator />
           {/* Grades */}
-          <div>
-            <Label>Grades</Label>
-             <MultiSelect
-                options={gradeOptions}
-                onValueChange={handleGradeChange}
-                defaultValue={filters.grades}
-                placeholder="Select grades..."
-                variant="inverted"
-                animation={2}
-                maxCount={3}
-              />
-          </div>
+          <GradeFilter selectedGrades={filters.grades} onChange={handleGradeChange} />
+          
           <Separator />
           {/* Subject/Field */}
           <div>
