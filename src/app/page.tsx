@@ -68,6 +68,13 @@ export default function Home() {
                 </Card>
               ))}
             </div>
+            <div className="text-center mt-12">
+              <Link href="/dashboard">
+                <Button size="lg" variant="outline">
+                  See More Opportunities <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </section>
         
