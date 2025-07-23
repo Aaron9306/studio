@@ -9,7 +9,7 @@ import { SubmitOpportunityDialog } from '@/components/dashboard/SubmitOpportunit
 import { useAuth } from '@/contexts/AuthContext';
 import { Opportunity } from '@/lib/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { addMonths, endOfWeek } from 'date-fns';
+import { addMonths, endOfWeek, endOfYear } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DashboardPage() {
@@ -31,7 +31,12 @@ export default function DashboardPage() {
 
   const filteredOpportunities = useMemo(() => {
     return opportunities
-      .filter(opp => opp.status === 'approved')
+      .filter(opp => {
+        // For the "closed" filter, we want to show everything, even non-approved ones (for admins maybe)
+        // but for general view, let's stick to approved ones unless 'closed' is selected.
+        if (filters.deadline === 'closed') return true;
+        return opp.status === 'approved'
+      })
       .filter(opp => {
         const searchMatch = opp.title.toLowerCase().includes(filters.search.toLowerCase());
         const typeMatch = filters.types.length === 0 || filters.types.includes(opp.type);
@@ -47,16 +52,22 @@ export default function DashboardPage() {
         const deadlineDate = opp.deadline.toDate();
         const now = new Date();
         let deadlineMatch = true;
-        if (filters.deadline === 'week') {
-            const endOfWeekDate = endOfWeek(now, { weekStartsOn: 1 });
-            deadlineMatch = deadlineDate >= now && deadlineDate <= endOfWeekDate;
-        } else if (filters.deadline === 'month') {
-            const endOfMonthDate = addMonths(now, 1);
-            endOfMonthDate.setDate(1); 
-            endOfMonthDate.setMonth(endOfMonthDate.getMonth() + 1);
-            endOfMonthDate.setDate(0);
-            deadlineMatch = deadlineDate >= now && deadlineDate <= endOfMonthDate;
+        
+        if(filters.deadline !== 'all') {
+             if (filters.deadline === 'week') {
+                const endOfWeekDate = endOfWeek(now, { weekStartsOn: 1 });
+                deadlineMatch = deadlineDate >= now && deadlineDate <= endOfWeekDate;
+            } else if (filters.deadline === 'month') {
+                const endOfMonthDate = addMonths(now, 1);
+                deadlineMatch = deadlineDate >= now && deadlineDate <= endOfMonthDate;
+            } else if (filters.deadline === 'year') {
+                const endOfYearDate = endOfYear(now);
+                deadlineMatch = deadlineDate >= now && deadlineDate <= endOfYearDate;
+            } else if (filters.deadline === 'closed') {
+                deadlineMatch = deadlineDate < now;
+            }
         }
+
 
         return searchMatch && typeMatch && subjectMatch && priceMatch && audienceMatch && formatMatch && deadlineMatch && emirateMatch && gradeMatch;
       });

@@ -172,7 +172,7 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
           {/* Grades */}
            <div>
             <Label>Grades</Label>
-            <GradeFilter filters={filters} setFilters={setFilters} />
+             <GradeFilter filters={filters} setFilters={setFilters} />
            </div>
           
           <Separator />
@@ -272,6 +272,14 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
                 <div className="flex items-center space-x-2">
                     <RadioGroupItem value="month" id="deadline-month" />
                     <Label htmlFor="deadline-month" className="font-normal">Closing this month</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="year" id="deadline-year" />
+                    <Label htmlFor="deadline-year" className="font-normal">Closing this year</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="closed" id="deadline-closed" />
+                    <Label htmlFor="deadline-closed" className="font-normal">Already closed</Label>
                 </div>
             </RadioGroup>
           </div>
