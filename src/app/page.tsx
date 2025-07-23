@@ -1,7 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowRight, Target, Lightbulb, Users, Briefcase, Code, HandHeart } from 'lucide-react';
+import { ArrowRight, Target, Lightbulb, Users, Laptop, Code, HandHeart } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -9,9 +9,9 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 export default function Home() {
   const opportunityTypes = [
     {
-      icon: Briefcase,
-      title: 'Internships',
-      description: 'Gain professional experience with leading companies in your field.',
+      icon: Laptop,
+      title: 'Bootcamps',
+      description: 'Acquire new skills and accelerate your learning with intensive workshops.',
     },
     {
       icon: Code,
