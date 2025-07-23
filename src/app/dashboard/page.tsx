@@ -45,12 +45,16 @@ export default function DashboardPage() {
         const formatMatch = filters.format === 'all' || opp.format === filters.format;
         const emirateMatch = filters.emirate === 'all' || opp.emirate === filters.emirate;
         
-        const audienceMatch = filters.audience === 'all' || opp.audience === filters.audience;
+        let audienceMatch = true;
+        if (filters.audience !== 'all') {
+          audienceMatch = opp.audience === filters.audience;
+        }
         
         const gradeMatch = filters.grades.length === 0 || (opp.grades && opp.grades.some(grade => filters.grades.includes(String(grade))));
         
         const deadlineDate = opp.deadline.toDate();
         const now = new Date();
+        now.setHours(0,0,0,0);
         let deadlineMatch = true;
         
         if(filters.deadline !== 'all') {

@@ -8,11 +8,12 @@ import Image from 'next/image';
 import { ArrowRight, Bookmark } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
+import { isPast } from 'date-fns';
 
 export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
   const { user, toggleBookmark } = useAuth();
   const isBookmarked = user?.bookmarkedOpportunities.includes(opportunity.id);
+  const isClosed = isPast(opportunity.deadline.toDate());
 
   const handleBookmarkClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -31,7 +32,10 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
             className="object-cover transition-transform duration-300 group-hover:scale-105"
             data-ai-hint="event cover"
           />
-          <Badge variant="secondary" className="absolute top-3 right-3">{opportunity.type}</Badge>
+          <div className="absolute top-3 right-3 flex flex-col items-end gap-2">
+            <Badge variant="secondary">{opportunity.type}</Badge>
+            {isClosed && <Badge variant="destructive">Closed</Badge>}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="p-6 flex-grow">
@@ -40,8 +44,8 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
       </CardContent>
       <CardFooter className="p-6 bg-secondary/50 flex justify-between items-center">
         <Link href={`/opportunity/${opportunity.id}`} passHref>
-          <Button variant="default">
-            See More <ArrowRight className="ml-2 h-4 w-4" />
+          <Button variant="default" disabled={isClosed}>
+            {isClosed ? 'View Details' : 'See More'} <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </Link>
         <Button 

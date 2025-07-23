@@ -37,6 +37,7 @@ const opportunitySchema = z.object({
   deadline: z.date(),
   emirate: z.enum(["Abu Dhabi", "Ajman", "Dubai", "Fujairah", "Ras Al Khaimah", "Sharjah", "Umm Al Quwain", "All Emirates"]),
   registrationLink: z.string().url('Must be a valid URL.').optional().or(z.literal('')),
+  detailsLink: z.string().url('Must be a valid URL.').optional().or(z.literal('')),
   imageUrl: z.string().url('Must be a valid URL.').optional().or(z.literal('')),
 });
 
@@ -75,6 +76,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
       deadline: new Date(),
       emirate: 'All Emirates',
       registrationLink: '',
+      detailsLink: '',
       imageUrl: '',
     },
   });
@@ -83,9 +85,10 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
     if (open) {
       if (opportunityToEdit) {
         form.reset({
-          ...opportunityToedit,
+          ...opportunityToEdit,
           deadline: opportunityToEdit.deadline.toDate(),
           grades: opportunityToEdit.grades ? opportunityToEdit.grades.map(String) : [],
+          detailsLink: opportunityToEdit.detailsLink || '',
         });
       } else {
           form.reset({
@@ -100,6 +103,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
               deadline: new Date(),
               emirate: 'All Emirates',
               registrationLink: '',
+              detailsLink: '',
               imageUrl: '',
           });
       }
@@ -207,7 +211,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                   </PopoverTrigger>
                   <PopoverPortal>
                     <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date() || date < new Date("1900-01-01")} initialFocus />
+                      <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date("1900-01-01")} initialFocus />
                     </PopoverContent>
                   </PopoverPortal>
                 </Popover><FormMessage /></FormItem>
@@ -222,7 +226,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                    <div className="flex gap-2">
                      <Select value={currentGrade} onValueChange={setCurrentGrade}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a grade" />
+                          <SelectValue placeholder="Select a grade to add" />
                         </SelectTrigger>
                         <SelectContent>
                            {gradeOptions
@@ -234,7 +238,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                            ))}
                         </SelectContent>
                       </Select>
-                      <Button type="button" onClick={handleAddGrade} disabled={!currentGrade}>Add</Button>
+                      <Button type="button" onClick={handleAddGrade} disabled={!currentGrade}>Add Grade</Button>
                    </div>
                     <div className="flex flex-wrap gap-2 pt-2">
                         {form.getValues('grades').map(grade => (
@@ -273,6 +277,9 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
             )}/>
              <FormField control={form.control} name="registrationLink" render={({ field }) => (
                 <FormItem><FormLabel>Registration Link (Optional)</FormLabel><FormControl><Input placeholder="https://example.com/register" {...field} /></FormControl><FormMessage /></FormItem>
+            )}/>
+            <FormField control={form.control} name="detailsLink" render={({ field }) => (
+                <FormItem><FormLabel>Details Link (Optional)</FormLabel><FormControl><Input placeholder="https://example.com/details" {...field} /></FormControl><FormMessage /></FormItem>
             )}/>
             <FormField control={form.control} name="imageUrl" render={({ field }) => (
                 <FormItem><FormLabel>Image URL (Optional)</FormLabel><FormControl><Input placeholder="https://example.com/image.png" {...field} /></FormControl><FormMessage /></FormItem>

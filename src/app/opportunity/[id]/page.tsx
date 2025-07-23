@@ -7,7 +7,7 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Bookmark, Calendar, Globe, Tag, Users, Wallet, Clock, User, ExternalLink, Edit, BookCopy } from "lucide-react";
+import { Bookmark, Calendar, Globe, Tag, Users, Wallet, Clock, User, ExternalLink, Edit, BookCopy, Info } from "lucide-react";
 import { format as formatDate } from 'date-fns';
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -123,6 +123,13 @@ export default function OpportunityDetailPage() {
                     <Button asChild size="lg">
                         <Link href={opportunity.registrationLink} target="_blank">
                            Register Now <ExternalLink className="ml-2 h-4 w-4" />
+                        </Link>
+                    </Button>
+                )}
+                 {opportunity.detailsLink && (
+                    <Button asChild size="lg" variant="secondary">
+                        <Link href={opportunity.detailsLink} target="_blank">
+                           More Details <Info className="ml-2 h-4 w-4" />
                         </Link>
                     </Button>
                 )}

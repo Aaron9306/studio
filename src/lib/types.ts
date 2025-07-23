@@ -22,6 +22,7 @@ export interface Opportunity {
   deadline: Timestamp;
   emirate: Emirate;
   registrationLink?: string;
+  detailsLink?: string;
   imageUrl?: string;
   status: OpportunityStatus;
   submittedBy: string; // user id
