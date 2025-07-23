@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center space-x-2 mb-4 md:mb-0">
             <Building className="h-6 w-6 text-primary" />
-            <span className="font-bold font-headline">Youth Opportunities Hub</span>
+            <span className="font-bold font-headline">UAE Opportunities Hub</span>
           </div>
           <nav className="flex space-x-6 text-sm font-medium">
             <Link href="/about" className="transition-colors hover:text-primary">
@@ -26,7 +26,7 @@ export default function Footer() {
           </nav>
         </div>
         <div className="text-center text-muted-foreground text-sm mt-8">
-          © {new Date().getFullYear()} Youth Opportunities Hub. All rights reserved.
+          © {new Date().getFullYear()} UAE Opportunities Hub. All rights reserved.
         </div>
       </div>
     </footer>

@@ -27,7 +27,7 @@ import { Badge } from '../ui/badge';
 
 const opportunitySchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.'),
-  type: z.enum(['MUN', 'Internship', 'Volunteering', 'Competition', 'Summer Camp', 'Hackathon', 'Workshop']),
+  type: z.enum(['MUN', 'Internship', 'Volunteering', 'Competition', 'Bootcamp', 'Hackathon', 'Workshop']),
   description: z.string().min(20, 'Description must be at least 20 characters.'),
   subject: z.string().min(2, 'Subject is required.'),
   grades: z.array(z.string()).min(1, 'At least one grade must be selected.'),
@@ -41,7 +41,7 @@ const opportunitySchema = z.object({
   imageUrl: z.string().url('Must be a valid URL.').optional().or(z.literal('')),
 });
 
-const opportunityTypes: OpportunityType[] = ['MUN', 'Internship', 'Volunteering', 'Competition', 'Summer Camp', 'Hackathon', 'Workshop'];
+const opportunityTypes: OpportunityType[] = ['MUN', 'Internship', 'Volunteering', 'Competition', 'Bootcamp', 'Hackathon', 'Workshop'];
 const subjects = ['Technology', 'Business', 'Arts & Culture', 'Science', 'Politics', 'Social Work', 'Engineering', 'Health & Medicine', 'Environment'];
 const emirates: (Emirate | "All Emirates")[] = ["Abu Dhabi", "Ajman", "Dubai", "Fujairah", "Ras Al Khaimah", "Sharjah", "Umm Al Quwain", "All Emirates"];
 const gradeOptions = Array.from({ length: 12 }, (_, i) => ({

@@ -2,6 +2,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Target, Lightbulb, Users } from 'lucide-react';
+import Image from 'next/image';
 
 export default function AboutPage() {
   return (
@@ -9,7 +10,7 @@ export default function AboutPage() {
       <Header />
       <main className="flex-grow container mx-auto px-4 py-16">
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary">About Us</h1>
+          <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary">About UAE Opportunities Hub</h1>
           <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
             Your centralized hub for discovering extracurricular opportunities in the UAE.
           </p>
@@ -26,54 +27,59 @@ export default function AboutPage() {
             </p>
           </div>
           <div>
-            <img
-              src="https://placehold.co/600x400.png"
+            <Image
+              src="https://lassonde.utah.edu/wp/wp-content/uploads/2023/11/AdobeStock_495433763-1920x1080.jpeg"
               alt="Students collaborating"
-              className="rounded-lg shadow-xl"
+              width={600}
+              height={400}
+              className="rounded-lg shadow-xl object-cover"
               data-ai-hint="collaboration students"
             />
           </div>
         </div>
 
         <div className="mt-24">
-          <h2 className="text-3xl font-headline font-semibold text-center mb-12">Our Mission</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="text-center">
+          <div className="text-center">
+             <h2 className="text-3xl font-headline font-semibold">Our Mission</h2>
+             <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">We are dedicated to bridging the information gap and empowering the next generation of leaders in the UAE.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+            <Card className="text-center border-t-4 border-primary">
               <CardHeader>
-                <div className="mx-auto bg-primary/10 rounded-full p-3 w-fit">
+                <div className="mx-auto bg-primary/10 rounded-full p-4 w-fit">
                   <Target className="h-8 w-8 text-primary" />
                 </div>
-                <CardTitle className="font-headline mt-4">Centralize</CardTitle>
+                <CardTitle className="font-headline mt-4 text-xl">Centralize Access</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  To bring all youth opportunities into one easy-to-navigate platform, saving students time and effort.
+                  To bring every youth opportunity—from internships to workshops—into one simple, powerful, and easy-to-navigate platform.
                 </p>
               </CardContent>
             </Card>
-            <Card className="text-center">
+            <Card className="text-center border-t-4 border-primary">
               <CardHeader>
-                <div className="mx-auto bg-primary/10 rounded-full p-3 w-fit">
+                <div className="mx-auto bg-primary/10 rounded-full p-4 w-fit">
                   <Lightbulb className="h-8 w-8 text-primary" />
                 </div>
-                <CardTitle className="font-headline mt-4">Simplify</CardTitle>
+                <CardTitle className="font-headline mt-4 text-xl">Simplify Discovery</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  To simplify the discovery process with powerful filters, allowing students to find the perfect activity for their interests and goals.
+                  To provide smart filtering and search tools that allow students to instantly find the perfect activity for their unique interests and future goals.
                 </p>
               </CardContent>
             </Card>
-            <Card className="text-center">
+            <Card className="text-center border-t-4 border-primary">
               <CardHeader>
-                <div className="mx-auto bg-primary/10 rounded-full p-3 w-fit">
+                <div className="mx-auto bg-primary/10 rounded-full p-4 w-fit">
                   <Users className="h-8 w-8 text-primary" />
                 </div>
-                <CardTitle className="font-headline mt-4">Empower</CardTitle>
+                <CardTitle className="font-headline mt-4 text-xl">Empower Futures</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  To empower the youth of the UAE by providing them with the tools and information they need to succeed outside the classroom.
+                  To equip the youth of the UAE with the critical information and experiences they need to build successful futures outside the classroom.
                 </p>
               </CardContent>
             </Card>

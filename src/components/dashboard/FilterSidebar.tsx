@@ -14,7 +14,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { ScrollArea } from '../ui/scroll-area';
 import { Emirate } from '@/lib/types';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { cn } from '@/lib/utils';
 
 export interface Filters {
   search: string;
@@ -33,7 +32,7 @@ interface FilterSidebarProps {
   setFilters: Dispatch<SetStateAction<Filters>>;
 }
 
-const opportunityTypes = ['MUN', 'Internship', 'Volunteering', 'Competition', 'Summer Camp', 'Hackathon', 'Workshop'];
+const opportunityTypes = ['MUN', 'Internship', 'Volunteering', 'Competition', 'Bootcamp', 'Hackathon', 'Workshop'];
 const subjects = ['Technology', 'Business', 'Arts & Culture', 'Science', 'Politics', 'Social Work', 'Engineering', 'Health & Medicine', 'Environment'];
 const emirates: Emirate[] = ["Abu Dhabi", "Ajman", "Dubai", "Fujairah", "Ras Al Khaimah", "Sharjah", "Umm Al Quwain"];
 const gradeOptions = Array.from({ length: 12 }, (_, i) => ({
@@ -277,7 +276,7 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
                     <RadioGroupItem value="year" id="deadline-year" />
                     <Label htmlFor="deadline-year" className="font-normal">Closing this year</Label>
                 </div>
-                <div className="flex items-center space-x-2">
+                 <div className="flex items-center space-x-2">
                     <RadioGroupItem value="closed" id="deadline-closed" />
                     <Label htmlFor="deadline-closed" className="font-normal">Already closed</Label>
                 </div>

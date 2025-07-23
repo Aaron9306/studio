@@ -1,6 +1,6 @@
 import { Timestamp } from "firebase/firestore";
 
-export type OpportunityType = 'MUN' | 'Internship' | 'Volunteering' | 'Competition' | 'Summer Camp' | 'Hackathon' | 'Workshop';
+export type OpportunityType = 'MUN' | 'Internship' | 'Volunteering' | 'Competition' | 'Bootcamp' | 'Hackathon' | 'Workshop';
 export type OpportunityAudience = 'All Nationalities' | 'Emiratis Only';
 export type OpportunityFormat = 'Online' | 'Offline';
 export type OpportunityPrice = 'Free' | 'Paid';

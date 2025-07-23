@@ -25,7 +25,7 @@ export function AuthFormContainer({
        <div className="absolute top-8 left-8">
          <Link href="/" className="flex items-center space-x-2 text-foreground hover:text-primary transition-colors">
             <Building className="h-6 w-6" />
-            <span className="font-bold font-headline">Youth Opportunities Hub</span>
+            <span className="font-bold font-headline">UAE Opportunities Hub</span>
           </Link>
        </div>
       <Card className="mx-auto w-full max-w-sm shadow-xl">

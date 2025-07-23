@@ -12,7 +12,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: 'Youth Opportunities Hub',
+  title: 'UAE Opportunities Hub',
   description: 'Discover extracurricular opportunities for youth in the UAE.',
 };
 
