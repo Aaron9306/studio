@@ -19,7 +19,7 @@ import { summarizeDescription } from '@/ai/flows/summarize-flow';
 interface OpportunityContextType {
   opportunities: Opportunity[];
   getOpportunityById: (id: string) => Opportunity | undefined;
-  addOpportunity: (opportunity: Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'summary'>) => Promise<void>;
+  addOpportunity: (opportunity: Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'summary' | 'grades'> & { grades: number[] }) => Promise<void>;
   updateOpportunityStatus: (id: string, status: OpportunityStatus) => Promise<void>;
   updateOpportunity: (id: string, updatedOpportunity: Partial<Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'summary'>>) => Promise<void>;
   deleteOpportunity: (id: string) => Promise<void>;
@@ -53,7 +53,7 @@ export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
     return opportunities.find(opp => opp.id === id);
   };
 
-  const addOpportunity = async (opportunityData: Omit<Opportunity, 'id' | 'status'| 'createdAt' | 'summary'>) => {
+  const addOpportunity = async (opportunityData: Omit<Opportunity, 'id' | 'status'| 'createdAt' | 'summary' | 'grades'> & { grades: number[] }) => {
     if (!user) throw new Error("User not authenticated");
     const summary = await summarizeDescription({description: opportunityData.description});
     await addDoc(collection(db, 'opportunities'), {

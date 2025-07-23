@@ -15,22 +15,22 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Opportunity, OpportunityType, Emirate } from '@/lib/types';
 import { useEffect, useState } from 'react';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { CalendarIcon, PlusCircle, Trash2 } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger, PopoverPortal } from '../ui/popover';
+import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format as formatDate } from 'date-fns';
 import { Calendar } from '../ui/calendar';
 import { Label } from '../ui/label';
 import { Timestamp } from 'firebase/firestore';
 import { summarizeDescription } from '@/ai/flows/summarize-flow';
-import { Badge } from '../ui/badge';
+import { GradeSelect } from '../ui/grade-select';
 
 const opportunitySchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.'),
   type: z.enum(['MUN', 'Internship', 'Volunteering', 'Competition', 'Summer Camp', 'Hackathon', 'Workshop']),
   description: z.string().min(20, 'Description must be at least 20 characters.'),
   subject: z.string().min(2, 'Subject is required.'),
-  grades: z.array(z.number()).min(1, 'At least one grade must be selected.'),
+  grades: z.array(z.string()).min(1, 'At least one grade must be selected.'),
   price: z.enum(['Free', 'Paid']),
   audience: z.enum(['All Nationalities', 'Emiratis Only']),
   format: z.enum(['Online', 'Offline']),
@@ -44,10 +44,6 @@ const opportunityTypes: OpportunityType[] = ['MUN', 'Internship', 'Volunteering'
 const subjects = ['Technology', 'Business', 'Arts & Culture', 'Science', 'Politics', 'Social Work', 'Engineering', 'Health & Medicine', 'Environment'];
 const emirates: (Emirate | "All Emirates")[] = ["Abu Dhabi", "Ajman", "Dubai", "Fujairah", "Ras Al Khaimah", "Sharjah", "Umm Al Quwain", "All Emirates"];
 
-const gradeOptions = Array.from({ length: 12 }, (_, i) => ({
-  value: `${i + 1}`,
-  label: `Grade ${i + 1}`,
-}));
 
 interface SubmitOpportunityDialogProps {
   opportunityToEdit?: Opportunity;
@@ -60,8 +56,6 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
   const { user } = useAuth();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
-  const [currentGrade, setCurrentGrade] = useState<string>('');
-
 
   const form = useForm<z.infer<typeof opportunitySchema>>({
     resolver: zodResolver(opportunitySchema),
@@ -81,29 +75,13 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
     },
   });
 
-  const selectedGrades = form.watch('grades');
-
-  const handleAddGrade = () => {
-    if (currentGrade) {
-      const gradeValue = parseInt(currentGrade, 10);
-      if (!selectedGrades.includes(gradeValue)) {
-        form.setValue('grades', [...selectedGrades, gradeValue].sort((a,b) => a-b));
-        setCurrentGrade('');
-      }
-    }
-  };
-
-  const handleRemoveGrade = (gradeToRemove: number) => {
-    form.setValue('grades', selectedGrades.filter((g) => g !== gradeToRemove));
-  };
-
   useEffect(() => {
     if (open) {
       if (opportunityToEdit) {
         form.reset({
           ...opportunityToEdit,
           deadline: opportunityToEdit.deadline.toDate(),
-          grades: opportunityToEdit.grades || [],
+          grades: opportunityToEdit.grades ? opportunityToEdit.grades.map(String) : [],
         });
       } else {
           form.reset({
@@ -144,7 +122,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
         ...values,
         summary,
         deadline: Timestamp.fromDate(values.deadline),
-        grades: values.grades,
+        grades: values.grades.map(Number),
     };
 
     try {
@@ -209,45 +187,25 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date() || date < new Date("1900-01-01")} initialFocus />
-                  </PopoverContent>
+                  <PopoverPortal>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date() || date < new Date("1900-01-01")} initialFocus />
+                    </PopoverContent>
+                  </PopoverPortal>
                 </Popover><FormMessage /></FormItem>
               )}
             />
             <FormField
               control={form.control}
               name="grades"
-              render={() => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Grades</FormLabel>
-                  <div className="flex items-center gap-2">
-                    <Select value={currentGrade} onValueChange={setCurrentGrade}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a grade" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {gradeOptions.map((option) => (
-                           <SelectItem key={option.value} value={option.value} disabled={selectedGrades.includes(parseInt(option.value, 10))}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Button type="button" variant="outline" size="icon" onClick={handleAddGrade} disabled={!currentGrade}>
-                        <PlusCircle className="h-4 w-4" />
-                    </Button>
-                  </div>
-                   <div className="flex flex-wrap gap-2 pt-2">
-                    {selectedGrades.map((grade) => (
-                      <Badge key={grade} variant="secondary">
-                        Grade {grade}
-                        <button type="button" className="ml-2" onClick={() => handleRemoveGrade(grade)}>
-                          <Trash2 className="h-3 w-3" />
-                        </button>
-                      </Badge>
-                    ))}
-                  </div>
+                   <GradeSelect
+                    selected={field.value}
+                    setSelected={field.onChange}
+                    placeholder="Select applicable grades..."
+                   />
                   <FormMessage />
                 </FormItem>
               )}

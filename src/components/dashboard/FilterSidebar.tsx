@@ -9,12 +9,12 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Filter, X, PlusCircle, Trash2 } from 'lucide-react';
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import { Filter, X } from 'lucide-react';
+import React, { Dispatch, SetStateAction } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ScrollArea } from '../ui/scroll-area';
 import { Emirate } from '@/lib/types';
-import { Badge } from '../ui/badge';
+import { GradeSelect } from '../ui/grade-select';
 
 export interface Filters {
   search: string;
@@ -36,61 +36,6 @@ interface FilterSidebarProps {
 const opportunityTypes = ['MUN', 'Internship', 'Volunteering', 'Competition', 'Summer Camp', 'Hackathon', 'Workshop'];
 const subjects = ['Technology', 'Business', 'Arts & Culture', 'Science', 'Politics', 'Social Work', 'Engineering', 'Health & Medicine', 'Environment'];
 const emirates: Emirate[] = ["Abu Dhabi", "Ajman", "Dubai", "Fujairah", "Ras Al Khaimah", "Sharjah", "Umm Al Quwain"];
-
-const gradeOptions = Array.from({ length: 12 }, (_, i) => ({
-  value: `${i + 1}`,
-  label: `Grade ${i + 1}`,
-}));
-
-function GradeFilter({ selectedGrades, onChange }: { selectedGrades: string[]; onChange: (grades: string[]) => void }) {
-
-  const handleAllGradesChange = (checked: boolean) => {
-    if (checked) {
-      onChange(gradeOptions.map(g => g.value));
-    } else {
-      onChange([]);
-    }
-  };
-
-  const handleGradeChange = (grade: string, checked: boolean) => {
-    if (checked) {
-      onChange([...selectedGrades, grade].sort((a, b) => parseInt(a, 10) - parseInt(b, 10)));
-    } else {
-      onChange(selectedGrades.filter(g => g !== grade));
-    }
-  };
-  
-  const allGradesSelected = selectedGrades.length === gradeOptions.length;
-
-  return (
-    <div>
-      <Label>Grades</Label>
-      <div className="space-y-2 mt-2">
-        <div className="flex items-center space-x-2">
-            <Checkbox
-                id="grade-all"
-                checked={allGradesSelected}
-                onCheckedChange={handleAllGradesChange}
-            />
-            <Label htmlFor="grade-all" className="font-normal">All Grades</Label>
-        </div>
-        <Separator />
-        <div className="grid grid-cols-2 gap-2">
-            {gradeOptions.map(option => (
-            <div key={option.value} className="flex items-center space-x-2">
-                <Checkbox
-                    id={`grade-${option.value}`}
-                    checked={selectedGrades.includes(option.value)}
-                    onCheckedChange={(checked) => handleGradeChange(option.value, !!checked)}
-                />
-                <Label htmlFor={`grade-${option.value}`} className="font-normal">{option.label}</Label>
-            </div>
-            ))}
-        </div>
-      </div>
-    </div>
-  )
-}
 
 
 export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
@@ -166,7 +111,14 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
           </div>
           <Separator />
           {/* Grades */}
-          <GradeFilter selectedGrades={filters.grades} onChange={handleGradeChange} />
+           <div>
+            <Label>Grades</Label>
+            <GradeSelect
+                selected={filters.grades}
+                setSelected={(grades) => handleGradeChange(grades)}
+                placeholder="Select grades..."
+            />
+           </div>
           
           <Separator />
           {/* Subject/Field */}
