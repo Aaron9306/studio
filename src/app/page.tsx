@@ -1,20 +1,29 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowRight, Target, Lightbulb, Users } from 'lucide-react';
+import { ArrowRight, Target, Lightbulb, Users, Briefcase, Code, HandHeart } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { useOpportunities } from '@/contexts/OpportunityContext';
-import { OpportunityCard } from '@/components/dashboard/OpportunityCard';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 export default function Home() {
-  const { opportunities, loading } = useOpportunities();
-  
-  const recentOpportunities = opportunities
-    .filter(opp => opp.status === 'approved')
-    .slice(0, 3);
+  const opportunityTypes = [
+    {
+      icon: Briefcase,
+      title: 'Internships',
+      description: 'Gain professional experience with leading companies in your field.',
+    },
+    {
+      icon: Code,
+      title: 'Hackathons & Competitions',
+      description: 'Test your skills, solve challenges, and win amazing prizes.',
+    },
+    {
+      icon: HandHeart,
+      title: 'Volunteering',
+      description: 'Make a positive impact in your community and support great causes.',
+    },
+  ];
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -38,33 +47,27 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Opportunities Preview Section */}
+        {/* What We Offer Section */}
         <section className="py-16 md:py-24 bg-background">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl md:text-4xl font-headline font-bold text-center mb-12">
               A Glimpse of What Awaits You
             </h2>
-            {loading ? (
-               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                 {Array.from({ length: 3 }).map((_, i) => (
-                   <div key={i} className="space-y-4">
-                     <Skeleton className="h-48 w-full" />
-                     <Skeleton className="h-6 w-3/4" />
-                     <Skeleton className="h-12 w-full" />
-                   </div>
-                 ))}
-               </div>
-            ) : recentOpportunities.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {recentOpportunities.map((opp) => (
-                    <OpportunityCard key={opp.id} opportunity={opp} />
-                  ))}
-                </div>
-            ) : (
-              <div className="text-center text-muted-foreground">
-                  No opportunities available at the moment. Check back soon!
-              </div>
-            )}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {opportunityTypes.map((type, index) => (
+                <Card key={index} className="text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                  <CardHeader>
+                    <div className="mx-auto bg-primary/10 rounded-full p-4 w-fit mb-4">
+                      <type.icon className="h-8 w-8 text-primary" />
+                    </div>
+                    <CardTitle className="font-headline text-2xl">{type.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">{type.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </section>
         
