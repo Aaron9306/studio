@@ -1,4 +1,5 @@
 
+
 'use client';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -41,54 +42,56 @@ const gradeOptions = Array.from({ length: 12 }, (_, i) => ({
   label: `Grade ${i + 1}`,
 }));
 
-function GradeFilter({ selectedGrades, onChange }: { selectedGrades: string[], onChange: (grades: string[]) => void }) {
-  const [currentGrade, setCurrentGrade] = useState('');
+function GradeFilter({ selectedGrades, onChange }: { selectedGrades: string[]; onChange: (grades: string[]) => void }) {
 
-  const handleAddGrade = () => {
-    if (currentGrade && !selectedGrades.includes(currentGrade)) {
-      const newGrades = [...selectedGrades, currentGrade].sort((a,b) => parseInt(a,10) - parseInt(b,10));
-      onChange(newGrades);
-      setCurrentGrade('');
+  const handleAllGradesChange = (checked: boolean) => {
+    if (checked) {
+      onChange(gradeOptions.map(g => g.value));
+    } else {
+      onChange([]);
     }
   };
 
-  const handleRemoveGrade = (gradeToRemove: string) => {
-    onChange(selectedGrades.filter(g => g !== gradeToRemove));
+  const handleGradeChange = (grade: string, checked: boolean) => {
+    if (checked) {
+      onChange([...selectedGrades, grade].sort((a, b) => parseInt(a, 10) - parseInt(b, 10)));
+    } else {
+      onChange(selectedGrades.filter(g => g !== grade));
+    }
   };
+  
+  const allGradesSelected = selectedGrades.length === gradeOptions.length;
 
   return (
     <div>
-        <Label>Grades</Label>
-         <div className="flex items-center gap-2 mt-2">
-            <Select value={currentGrade} onValueChange={setCurrentGrade}>
-                <SelectTrigger>
-                    <SelectValue placeholder="Select a grade" />
-                </SelectTrigger>
-                <SelectContent>
-                    {gradeOptions.map(option => (
-                        <SelectItem key={option.value} value={option.value} disabled={selectedGrades.includes(option.value)}>
-                            {option.label}
-                        </SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
-            <Button type="button" variant="outline" size="icon" onClick={handleAddGrade} disabled={!currentGrade}>
-                <PlusCircle className="h-4 w-4" />
-            </Button>
+      <Label>Grades</Label>
+      <div className="space-y-2 mt-2">
+        <div className="flex items-center space-x-2">
+            <Checkbox
+                id="grade-all"
+                checked={allGradesSelected}
+                onCheckedChange={handleAllGradesChange}
+            />
+            <Label htmlFor="grade-all" className="font-normal">All Grades</Label>
         </div>
-        <div className="flex flex-wrap gap-1 pt-2">
-            {selectedGrades.map(grade => (
-                <Badge key={grade} variant="secondary" className="font-normal">
-                    Grade {grade}
-                    <button type="button" className="ml-1.5" onClick={() => handleRemoveGrade(grade)}>
-                        <X className="h-3 w-3" />
-                    </button>
-                </Badge>
+        <Separator />
+        <div className="grid grid-cols-2 gap-2">
+            {gradeOptions.map(option => (
+            <div key={option.value} className="flex items-center space-x-2">
+                <Checkbox
+                    id={`grade-${option.value}`}
+                    checked={selectedGrades.includes(option.value)}
+                    onCheckedChange={(checked) => handleGradeChange(option.value, !!checked)}
+                />
+                <Label htmlFor={`grade-${option.value}`} className="font-normal">{option.label}</Label>
+            </div>
             ))}
         </div>
+      </div>
     </div>
   )
 }
+
 
 export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
   const isMobile = useIsMobile();
