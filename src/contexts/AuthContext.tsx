@@ -8,6 +8,8 @@ import {
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signOut,
+  GoogleAuthProvider,
+  signInWithPopup,
   User as FirebaseUser
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
@@ -19,6 +21,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   adminLogin: (email: string, password: string) => Promise<boolean>;
   signup: (name: string, email: string, password: string) => Promise<boolean>;
+  signInWithGoogle: () => Promise<boolean>;
   logout: () => void;
   loading: boolean;
   toggleBookmark: (opportunityId: string) => void;
@@ -43,6 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUser({ id: userDoc.id, ...userDoc.data() } as User);
         } else {
           // This case might happen if a user is created in Auth but not in Firestore
+          // e.g. first time Google sign in, which is handled in signInWithGoogle
           setUser(null);
         }
       } else {
@@ -124,6 +128,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const signInWithGoogle = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const fbUser = result.user;
+      const userDocRef = doc(db, 'users', fbUser.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (!userDoc.exists()) {
+        const newUser: User = {
+          id: fbUser.uid,
+          name: fbUser.displayName || 'Google User',
+          email: fbUser.email!,
+          role: 'student',
+          bookmarkedOpportunities: [],
+        };
+        await setDoc(userDocRef, newUser);
+      }
+      
+      router.push('/dashboard');
+      return true;
+    } catch (error: any) {
+      console.error("Google Sign-In Error:", error);
+      toast({
+        variant: 'destructive',
+        title: 'Google Sign-In Failed',
+        description: error.message || 'An unexpected error occurred. Please try again.',
+      });
+      return false;
+    }
+  };
+
+
   const logout = async () => {
     await signOut(auth);
     router.push('/login');
@@ -154,7 +191,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const value = { user, firebaseUser, login, adminLogin, signup, logout, loading, toggleBookmark };
+  const value = { user, firebaseUser, login, adminLogin, signup, signInWithGoogle, logout, loading, toggleBookmark };
 
   return (
     <AuthContext.Provider value={value}>
