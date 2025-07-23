@@ -8,11 +8,13 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Filter, X } from 'lucide-react';
-import React, { Dispatch, SetStateAction } from 'react';
+import { Filter, X, ChevronDown } from 'lucide-react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ScrollArea } from '../ui/scroll-area';
 import { Emirate } from '@/lib/types';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { cn } from '@/lib/utils';
 
 export interface Filters {
   search: string;
@@ -39,17 +41,8 @@ const gradeOptions = Array.from({ length: 12 }, (_, i) => ({
   label: `Grade ${i + 1}`,
 }));
 
-export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
-  const isMobile = useIsMobile();
-  
-  const handleTypeChange = (type: string) => {
-    setFilters(prev => ({
-      ...prev,
-      types: prev.types.includes(type)
-        ? prev.types.filter(t => t !== type)
-        : [...prev.types, type]
-    }));
-  };
+function GradeFilter({ filters, setFilters }: { filters: Filters, setFilters: Dispatch<SetStateAction<Filters>> }) {
+  const [open, setOpen] = useState(false);
 
   const handleGradeChange = (grade: string) => {
     setFilters(prev => ({
@@ -66,6 +59,61 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
     } else {
       setFilters(prev => ({ ...prev, grades: [] }));
     }
+  };
+  
+  const allSelected = filters.grades.length === gradeOptions.length;
+  const someSelected = filters.grades.length > 0 && !allSelected;
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between">
+          {filters.grades.length === 0 && "Select Grades..."}
+          {allSelected && "All Grades Selected"}
+          {someSelected && `${filters.grades.length} Grades Selected`}
+          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+         <ScrollArea className="h-60">
+            <div className="p-4 space-y-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="grade-all" 
+                  checked={allSelected}
+                  onCheckedChange={(checked) => handleAllGradesChange(!!checked)}
+                />
+                <Label htmlFor="grade-all" className="font-medium">All Grades</Label>
+              </div>
+              <Separator />
+              {gradeOptions.map(grade => (
+                <div key={grade.value} className="flex items-center space-x-2">
+                  <Checkbox 
+                    id={`grade-${grade.value}`}
+                    checked={filters.grades.includes(grade.value)}
+                    onCheckedChange={() => handleGradeChange(grade.value)}
+                  />
+                  <Label htmlFor={`grade-${grade.value}`} className="font-normal">{grade.label}</Label>
+                </div>
+              ))}
+            </div>
+         </ScrollArea>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+
+export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
+  const isMobile = useIsMobile();
+  
+  const handleTypeChange = (type: string) => {
+    setFilters(prev => ({
+      ...prev,
+      types: prev.types.includes(type)
+        ? prev.types.filter(t => t !== type)
+        : [...prev.types, type]
+    }));
   };
 
   const handleReset = () => {
@@ -124,26 +172,7 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
           {/* Grades */}
            <div>
             <Label>Grades</Label>
-             <div className="space-y-2 mt-2">
-               <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="grade-all" 
-                    checked={filters.grades.length === gradeOptions.length}
-                    onCheckedChange={(checked) => handleAllGradesChange(!!checked)}
-                  />
-                  <Label htmlFor="grade-all" className="font-normal">All Grades</Label>
-                </div>
-                {gradeOptions.map(grade => (
-                  <div key={grade.value} className="flex items-center space-x-2">
-                    <Checkbox 
-                      id={`grade-${grade.value}`}
-                      checked={filters.grades.includes(grade.value)}
-                      onCheckedChange={() => handleGradeChange(grade.value)}
-                    />
-                    <Label htmlFor={`grade-${grade.value}`} className="font-normal">{grade.label}</Label>
-                  </div>
-                ))}
-              </div>
+            <GradeFilter filters={filters} setFilters={setFilters} />
            </div>
           
           <Separator />
