@@ -1,5 +1,4 @@
 
-
 'use client';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -14,7 +13,6 @@ import React, { Dispatch, SetStateAction } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ScrollArea } from '../ui/scroll-area';
 import { Emirate } from '@/lib/types';
-import { GradeSelect } from '../ui/grade-select';
 
 export interface Filters {
   search: string;
@@ -36,7 +34,10 @@ interface FilterSidebarProps {
 const opportunityTypes = ['MUN', 'Internship', 'Volunteering', 'Competition', 'Summer Camp', 'Hackathon', 'Workshop'];
 const subjects = ['Technology', 'Business', 'Arts & Culture', 'Science', 'Politics', 'Social Work', 'Engineering', 'Health & Medicine', 'Environment'];
 const emirates: Emirate[] = ["Abu Dhabi", "Ajman", "Dubai", "Fujairah", "Ras Al Khaimah", "Sharjah", "Umm Al Quwain"];
-
+const gradeOptions = Array.from({ length: 12 }, (_, i) => ({
+  value: `${i + 1}`,
+  label: `Grade ${i + 1}`,
+}));
 
 export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
   const isMobile = useIsMobile();
@@ -50,12 +51,22 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
     }));
   };
 
-  const handleGradeChange = (grades: string[]) => {
-     setFilters(prev => ({
+  const handleGradeChange = (grade: string) => {
+    setFilters(prev => ({
       ...prev,
-      grades: grades
+      grades: prev.grades.includes(grade)
+        ? prev.grades.filter(g => g !== grade)
+        : [...prev.grades, grade]
     }));
-  }
+  };
+
+  const handleAllGradesChange = (checked: boolean) => {
+    if (checked) {
+      setFilters(prev => ({ ...prev, grades: gradeOptions.map(g => g.value) }));
+    } else {
+      setFilters(prev => ({ ...prev, grades: [] }));
+    }
+  };
 
   const handleReset = () => {
     setFilters({
@@ -100,11 +111,11 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
               {opportunityTypes.map(type => (
                 <div key={type} className="flex items-center space-x-2">
                   <Checkbox 
-                    id={type} 
+                    id={`type-${type}`}
                     checked={filters.types.includes(type)}
                     onCheckedChange={() => handleTypeChange(type)}
                   />
-                  <Label htmlFor={type} className="font-normal">{type}</Label>
+                  <Label htmlFor={`type-${type}`} className="font-normal">{type}</Label>
                 </div>
               ))}
             </div>
@@ -113,11 +124,26 @@ export function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
           {/* Grades */}
            <div>
             <Label>Grades</Label>
-            <GradeSelect
-                selected={filters.grades}
-                setSelected={(grades) => handleGradeChange(grades)}
-                placeholder="Select grades..."
-            />
+             <div className="space-y-2 mt-2">
+               <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="grade-all" 
+                    checked={filters.grades.length === gradeOptions.length}
+                    onCheckedChange={(checked) => handleAllGradesChange(!!checked)}
+                  />
+                  <Label htmlFor="grade-all" className="font-normal">All Grades</Label>
+                </div>
+                {gradeOptions.map(grade => (
+                  <div key={grade.value} className="flex items-center space-x-2">
+                    <Checkbox 
+                      id={`grade-${grade.value}`}
+                      checked={filters.grades.includes(grade.value)}
+                      onCheckedChange={() => handleGradeChange(grade.value)}
+                    />
+                    <Label htmlFor={`grade-${grade.value}`} className="font-normal">{grade.label}</Label>
+                  </div>
+                ))}
+              </div>
            </div>
           
           <Separator />

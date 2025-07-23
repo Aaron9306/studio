@@ -16,14 +16,14 @@ import { useToast } from '@/hooks/use-toast';
 import { Opportunity, OpportunityType, Emirate } from '@/lib/types';
 import { useEffect, useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger, PopoverPortal } from '../ui/popover';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, X as XIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format as formatDate } from 'date-fns';
 import { Calendar } from '../ui/calendar';
 import { Label } from '../ui/label';
 import { Timestamp } from 'firebase/firestore';
 import { summarizeDescription } from '@/ai/flows/summarize-flow';
-import { GradeSelect } from '../ui/grade-select';
+import { Badge } from '../ui/badge';
 
 const opportunitySchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.'),
@@ -43,7 +43,10 @@ const opportunitySchema = z.object({
 const opportunityTypes: OpportunityType[] = ['MUN', 'Internship', 'Volunteering', 'Competition', 'Summer Camp', 'Hackathon', 'Workshop'];
 const subjects = ['Technology', 'Business', 'Arts & Culture', 'Science', 'Politics', 'Social Work', 'Engineering', 'Health & Medicine', 'Environment'];
 const emirates: (Emirate | "All Emirates")[] = ["Abu Dhabi", "Ajman", "Dubai", "Fujairah", "Ras Al Khaimah", "Sharjah", "Umm Al Quwain", "All Emirates"];
-
+const gradeOptions = Array.from({ length: 12 }, (_, i) => ({
+  value: `${i + 1}`,
+  label: `Grade ${i + 1}`,
+}));
 
 interface SubmitOpportunityDialogProps {
   opportunityToEdit?: Opportunity;
@@ -56,6 +59,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
   const { user } = useAuth();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
+  const [currentGrade, setCurrentGrade] = useState<string>('');
 
   const form = useForm<z.infer<typeof opportunitySchema>>({
     resolver: zodResolver(opportunitySchema),
@@ -79,7 +83,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
     if (open) {
       if (opportunityToEdit) {
         form.reset({
-          ...opportunityToEdit,
+          ...opportunityToedit,
           deadline: opportunityToEdit.deadline.toDate(),
           grades: opportunityToEdit.grades ? opportunityToEdit.grades.map(String) : [],
         });
@@ -143,6 +147,20 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
     }
   };
 
+   const handleAddGrade = () => {
+    if (currentGrade && !form.getValues('grades').includes(currentGrade)) {
+      const currentGrades = form.getValues('grades');
+      form.setValue('grades', [...currentGrades, currentGrade].sort((a,b) => parseInt(a,10) - parseInt(b,10)));
+      setCurrentGrade('');
+    }
+  };
+
+  const handleRemoveGrade = (gradeToRemove: string) => {
+    const currentGrades = form.getValues('grades');
+    form.setValue('grades', currentGrades.filter((g) => g !== gradeToRemove));
+  };
+
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
@@ -198,14 +216,36 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
             <FormField
               control={form.control}
               name="grades"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
                   <FormLabel>Grades</FormLabel>
-                   <GradeSelect
-                    selected={field.value}
-                    setSelected={field.onChange}
-                    placeholder="Select applicable grades..."
-                   />
+                   <div className="flex gap-2">
+                     <Select value={currentGrade} onValueChange={setCurrentGrade}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a grade" />
+                        </SelectTrigger>
+                        <SelectContent>
+                           {gradeOptions
+                            .filter(option => !form.getValues('grades').includes(option.value))
+                            .map(option => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                           ))}
+                        </SelectContent>
+                      </Select>
+                      <Button type="button" onClick={handleAddGrade} disabled={!currentGrade}>Add</Button>
+                   </div>
+                    <div className="flex flex-wrap gap-2 pt-2">
+                        {form.getValues('grades').map(grade => (
+                           <Badge key={grade} variant="secondary" className="flex items-center gap-1">
+                                {gradeOptions.find(o => o.value === grade)?.label}
+                                <button type="button" onClick={() => handleRemoveGrade(grade)} className="rounded-full hover:bg-muted-foreground/20 p-0.5">
+                                    <XIcon className="h-3 w-3" />
+                                </button>
+                           </Badge>
+                        ))}
+                    </div>
                   <FormMessage />
                 </FormItem>
               )}
