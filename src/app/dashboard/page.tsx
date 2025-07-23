@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useMemo } from 'react';
 import { useOpportunities } from '@/contexts/OpportunityContext';
@@ -9,7 +10,7 @@ import { SubmitOpportunityDialog } from '@/components/dashboard/SubmitOpportunit
 import { useAuth } from '@/contexts/AuthContext';
 import { Opportunity } from '@/lib/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { addMonths, endOfWeek, endOfYear } from 'date-fns';
+import { addMonths, endOfWeek, endOfYear, isPast } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DashboardPage() {
@@ -30,52 +31,53 @@ export default function DashboardPage() {
   const loading = oppsLoading || authLoading;
 
   const filteredOpportunities = useMemo(() => {
+    const now = new Date();
+    now.setHours(0,0,0,0);
+      
     return opportunities
       .filter(opp => {
-        // For the "closed" filter, we want to show everything, even non-approved ones (for admins maybe)
-        // but for general view, let's stick to approved ones unless 'closed' is selected.
+        // Only show approved opportunities unless the user is specifically looking at closed ones (for history)
         if (filters.deadline === 'closed') return true;
-        return opp.status === 'approved'
+        return opp.status === 'approved';
       })
       .filter(opp => {
+        // Deadline filter logic
+        const deadlineDate = opp.deadline.toDate();
+        if (filters.deadline === 'all') {
+          if (isPast(deadlineDate)) return false; // Exclude closed opportunities from 'Anytime'
+        } else if (filters.deadline === 'week') {
+          const endOfWeekDate = endOfWeek(now, { weekStartsOn: 1 });
+          if (!(deadlineDate >= now && deadlineDate <= endOfWeekDate)) return false;
+        } else if (filters.deadline === 'month') {
+          const endOfMonthDate = addMonths(now, 1);
+          if (!(deadlineDate >= now && deadlineDate <= endOfMonthDate)) return false;
+        } else if (filters.deadline === 'year') {
+          const endOfYearDate = endOfYear(now);
+          if (!(deadlineDate >= now && deadlineDate <= endOfYearDate)) return false;
+        } else if (filters.deadline === 'closed') {
+          if (!isPast(deadlineDate)) return false;
+        }
+
+        // Audience filter logic
+        if (filters.audience === 'All Nationalities' && opp.audience === 'Emiratis Only') {
+            return false;
+        }
+        if (filters.audience === 'Emiratis Only' && opp.audience !== 'Emiratis Only') {
+            return false;
+        }
+
         const searchMatch = opp.title.toLowerCase().includes(filters.search.toLowerCase());
         const typeMatch = filters.types.length === 0 || filters.types.includes(opp.type);
         const subjectMatch = filters.subject === 'all' || opp.subject === filters.subject;
         const priceMatch = filters.price === 'all' || opp.price === filters.price;
         const formatMatch = filters.format === 'all' || opp.format === filters.format;
         const emirateMatch = filters.emirate === 'all' || opp.emirate === filters.emirate;
-        
-        let audienceMatch = true;
-        if (filters.audience !== 'all') {
-          audienceMatch = opp.audience === filters.audience;
-        }
-        
         const gradeMatch = filters.grades.length === 0 || (opp.grades && opp.grades.some(grade => filters.grades.includes(String(grade))));
-        
-        const deadlineDate = opp.deadline.toDate();
-        const now = new Date();
-        now.setHours(0,0,0,0);
-        let deadlineMatch = true;
-        
-        if(filters.deadline !== 'all') {
-             if (filters.deadline === 'week') {
-                const endOfWeekDate = endOfWeek(now, { weekStartsOn: 1 });
-                deadlineMatch = deadlineDate >= now && deadlineDate <= endOfWeekDate;
-            } else if (filters.deadline === 'month') {
-                const endOfMonthDate = addMonths(now, 1);
-                deadlineMatch = deadlineDate >= now && deadlineDate <= endOfMonthDate;
-            } else if (filters.deadline === 'year') {
-                const endOfYearDate = endOfYear(now);
-                deadlineMatch = deadlineDate >= now && deadlineDate <= endOfYearDate;
-            } else if (filters.deadline === 'closed') {
-                deadlineMatch = deadlineDate < now;
-            }
-        }
 
-
-        return searchMatch && typeMatch && subjectMatch && priceMatch && audienceMatch && formatMatch && deadlineMatch && emirateMatch && gradeMatch;
+        return searchMatch && typeMatch && subjectMatch && priceMatch && formatMatch && emirateMatch && gradeMatch;
       });
   }, [opportunities, filters]);
+
 
   const bookmarkedOpportunities = useMemo(() => {
     if (!user || !user.bookmarkedOpportunities) return [];
