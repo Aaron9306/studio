@@ -2,11 +2,14 @@
 import { AuthProvider } from '@/contexts/AuthContext';
 import { OpportunityProvider } from '@/contexts/OpportunityContext';
 import React from 'react';
+import { ThemeProvider } from 'next-themes';
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
-    <AuthProvider>
-      <OpportunityProvider>{children}</OpportunityProvider>
-    </AuthProvider>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <AuthProvider>
+        <OpportunityProvider>{children}</OpportunityProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

@@ -5,8 +5,29 @@ import { ArrowRight, Target, Lightbulb, Users, Laptop, Code, HandHeart } from 'l
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { useTheme } from 'next-themes';
+import { useEffect } from 'react';
 
 export default function Home() {
+  const { theme, resolvedTheme, setTheme } = useTheme();
+
+  useEffect(() => {
+    // Temporarily force light theme on homepage mount
+    const originalTheme = theme;
+    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.add('light');
+
+    // Cleanup on unmount
+    return () => {
+      // Revert to the original theme setting
+      if (originalTheme === 'dark' || (originalTheme === 'system' && resolvedTheme === 'dark')) {
+         document.documentElement.classList.remove('light');
+         document.documentElement.classList.add('dark');
+      }
+    };
+  }, [theme, resolvedTheme]);
+
+
   const opportunityTypes = [
     {
       icon: Laptop,

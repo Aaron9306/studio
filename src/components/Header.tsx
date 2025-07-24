@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Building, LogOut, User as UserIcon } from 'lucide-react';
+import { ThemeToggle } from './ThemeToggle';
 
 export default function Header() {
   const { user, logout, loading } = useAuth();
@@ -51,7 +52,8 @@ export default function Header() {
             Opportunities
           </Link>
         </nav>
-        <div className="flex flex-1 items-center justify-end space-x-4">
+        <div className="flex flex-1 items-center justify-end space-x-2 md:space-x-4">
+          <ThemeToggle />
           {loading ? (
             <div className="h-8 w-20 animate-pulse rounded-md bg-muted"></div>
           ) : user ? (
