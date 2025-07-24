@@ -8,6 +8,7 @@ import {
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signOut,
+  sendPasswordResetEmail,
   User as FirebaseUser
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
@@ -19,6 +20,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   adminLogin: (email: string, password: string) => Promise<boolean>;
   signup: (name: string, email: string, password: string) => Promise<boolean>;
+  sendPasswordReset: (email: string) => Promise<boolean>;
   logout: () => void;
   loading: boolean;
   toggleBookmark: (opportunityId: string) => void;
@@ -42,8 +44,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (userDoc.exists()) {
           setUser({ id: userDoc.id, ...userDoc.data() } as User);
         } else {
-          // This case might happen if a user is created in Auth but not in Firestore
-          // e.g. first time Google sign in, which is handled in signInWithGoogle
           setUser(null);
         }
       } else {
@@ -63,12 +63,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         router.push('/dashboard');
         return true;
       }
-      // If role is admin or user doc doesn't exist, sign out
       await signOut(auth);
       toast({ variant: 'destructive', title: 'Login Failed', description: 'No student account found for this email.' });
       return false;
     } catch (error) {
-      // This will catch wrong password, user not found etc.
       return false;
     }
   };
@@ -81,12 +79,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         router.push('/admin/dashboard');
         return true;
       }
-      // If role is not admin or user doc does not exist, sign them out.
        await signOut(auth);
        toast({ variant: 'destructive', title: 'Access Denied', description: 'You do not have administrator privileges.' });
       return false;
     } catch (error) {
-      // This will catch invalid credentials (wrong email/password)
       return false;
     }
   };
@@ -111,17 +107,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           title: 'Signup Failed',
           description: 'An account with this email already exists.',
         });
-        // Return false here to indicate the specific error to the form
         return false;
       }
-      // For any other error, show a generic message
       toast({
         variant: 'destructive',
         title: 'Signup Failed',
         description: 'An unexpected error occurred. Please try again.',
       });
-      // Throw the error so it can be caught by the calling function if needed, but not for form state
       throw error;
+    }
+  };
+
+  const sendPasswordReset = async (email: string) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      toast({
+        title: 'Password Reset Email Sent',
+        description: 'Check your inbox for a link to reset your password.',
+      });
+      return true;
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Could not send password reset email. Please check the address and try again.',
+      });
+      return false;
     }
   };
 
@@ -143,7 +154,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           : arrayUnion(opportunityId)
       });
 
-      // Optimistically update local state
       const updatedBookmarks = isBookmarked
         ? user.bookmarkedOpportunities.filter(id => id !== opportunityId)
         : [...user.bookmarkedOpportunities, opportunityId];
@@ -155,7 +165,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const value = { user, firebaseUser, login, adminLogin, signup, logout, loading, toggleBookmark };
+  const value = { user, firebaseUser, login, adminLogin, signup, sendPasswordReset, logout, loading, toggleBookmark };
 
   return (
     <AuthContext.Provider value={value}>

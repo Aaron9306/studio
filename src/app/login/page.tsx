@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AuthFormContainer } from '@/components/AuthFormContainer';
+import Link from 'next/link';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address.'),
@@ -85,7 +86,15 @@ export default function LoginPage() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                   <div className="flex items-center justify-between">
+                    <FormLabel>Password</FormLabel>
+                     <Link
+                        href="/forgot-password"
+                        className="text-sm font-medium text-primary hover:underline"
+                      >
+                        Forgot password?
+                      </Link>
+                  </div>
                   <FormControl>
                     <Input type="password" placeholder="••••••••" {...field} />
                   </FormControl>
