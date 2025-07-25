@@ -10,7 +10,7 @@ export default function AboutPage() {
       <Header />
       <main className="flex-grow container mx-auto px-4 py-16">
         <div className="text-center mb-24">
-          <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary-foreground">About UAE Opportunities Hub</h1>
+          <h1 className="text-4xl md:text-5xl font-headline font-bold text-foreground">About UAE Opportunities Hub</h1>
           <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
             Your centralized hub for discovering extracurricular opportunities in the UAE.
           </p>
@@ -18,7 +18,7 @@ export default function AboutPage() {
 
         <div className="grid md:grid-cols-2 gap-16 items-center">
           <div className="space-y-6">
-            <h2 className="text-3xl font-headline font-semibold text-primary-foreground">The Problem We Solve</h2>
+            <h2 className="text-3xl font-headline font-semibold text-foreground">The Problem We Solve</h2>
             <p className="text-muted-foreground leading-relaxed">
               Many incredible extracurricular opportunities—internships, volunteering roles, competitions, and more—are available across the UAE. However, these are often scattered across different websites, social media channels, and school notice boards. For ambitious students, finding relevant and timely opportunities can be a frustrating and time-consuming scavenger hunt.
             </p>
@@ -39,7 +39,7 @@ export default function AboutPage() {
 
         <div className="mt-32">
           <div className="text-center">
-             <h2 className="text-3xl font-headline font-semibold text-primary-foreground">Our Mission</h2>
+             <h2 className="text-3xl font-headline font-semibold text-foreground">Our Mission</h2>
              <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">We are dedicated to bridging the information gap and empowering the next generation of leaders in the UAE.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">

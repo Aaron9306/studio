@@ -31,10 +31,10 @@ export default function Home() {
       <Header />
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="relative py-20 md:py-40 text-center bg-grid-white/[0.1]">
+        <section className="relative py-20 md:py-40 text-center">
            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm"></div>
           <div className="container mx-auto px-4 relative">
-            <h1 className="text-4xl md:text-6xl font-headline font-bold mb-4 tracking-tight">
+            <h1 className="text-4xl md:text-6xl font-headline font-bold mb-4 tracking-tight text-foreground">
               Discover More <span className="text-primary">Opportunities</span> for UAE Youth
             </h1>
             <p className="text-lg md:text-xl max-w-3xl mx-auto mb-8 text-muted-foreground">
@@ -88,7 +88,7 @@ export default function Home() {
         <section className="py-16 md:py-24">
            <div className="container mx-auto px-4">
               <div className="text-center">
-                 <h2 className="text-3xl font-headline font-semibold text-primary-foreground">Our Mission</h2>
+                 <h2 className="text-3xl font-headline font-semibold text-foreground">Our Mission</h2>
                  <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">We are dedicated to bridging the information gap and empowering the next generation of leaders in the UAE.</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
