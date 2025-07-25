@@ -5,7 +5,6 @@ import { ArrowRight, Code, Trophy, Users, Target, Lightbulb } from 'lucide-react
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { ForceBlueTheme } from '@/components/ForceDarkTheme';
 
 export default function Home() {
   
@@ -28,8 +27,6 @@ export default function Home() {
   ];
 
   return (
-    <>
-    <ForceBlueTheme />
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
       <main className="flex-grow">
@@ -141,6 +138,5 @@ export default function Home() {
       </main>
       <Footer />
     </div>
-    </>
   );
 }

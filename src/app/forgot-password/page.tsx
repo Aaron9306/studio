@@ -8,7 +8,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import { AuthFormContainer } from '@/components/AuthFormContainer';
-import { ForceBlueTheme } from '@/components/ForceDarkTheme';
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Invalid email address.'),
@@ -37,8 +36,6 @@ export default function ForgotPasswordPage() {
 
   if (isSubmitted) {
     return (
-      <>
-      <ForceBlueTheme />
        <AuthFormContainer
         title="Check Your Email"
         description={`We've sent a password reset link to ${form.getValues('email')}.`}
@@ -48,13 +45,10 @@ export default function ForgotPasswordPage() {
        >
         <p className='text-center text-sm text-muted-foreground'>Please check your spam folder if you don't see it in your inbox.</p>
       </AuthFormContainer>
-      </>
     )
   }
 
   return (
-    <>
-    <ForceBlueTheme />
     <AuthFormContainer
       title="Forgot Your Password?"
       description="No problem. Enter your email and we'll send you a reset link."
@@ -83,6 +77,5 @@ export default function ForgotPasswordPage() {
           </form>
         </Form>
     </AuthFormContainer>
-    </>
   );
 }
