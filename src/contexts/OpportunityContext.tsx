@@ -17,6 +17,7 @@ import {
 import { useAuth } from './AuthContext';
 import * as z from 'zod';
 
+// This schema matches the form data structure.
 const opportunityFormSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.'),
   type: z.enum(['MUN', 'Internship', 'Volunteering', 'Competition', 'Bootcamp', 'Hackathon', 'Workshop']),
@@ -45,26 +46,6 @@ interface OpportunityContextType {
 }
 
 const OpportunityContext = createContext<OpportunityContextType | undefined>(undefined);
-
-// Helper function to prepare data for Firestore
-const prepareDataForFirestore = (data: OpportunityFormData) => {
-  const preparedData: any = { ...data };
-
-  // Convert deadline to Firestore Timestamp
-  if (data.deadline instanceof Date) {
-    preparedData.deadline = Timestamp.fromDate(data.deadline);
-  }
-
-  // Convert grades from string array to number array
-  if (data.grades) {
-    preparedData.grades = data.grades.map(Number).filter(n => !isNaN(n));
-  }
-
-  // Generate a simple summary
-  preparedData.summary = data.description ? data.description.substring(0, 100) + '...' : '';
-  
-  return preparedData;
-};
 
 export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
@@ -98,7 +79,10 @@ export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
     if (!user) throw new Error("User not authenticated");
 
     const dataToSave = {
-      ...prepareDataForFirestore(formData),
+      ...formData,
+      grades: formData.grades.map(Number),
+      deadline: Timestamp.fromDate(formData.deadline),
+      summary: formData.description.substring(0, 100) + '...',
       status: user.role === 'admin' ? 'approved' : 'pending',
       submittedBy: user.id,
       createdAt: serverTimestamp(),
@@ -115,12 +99,15 @@ export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
     if (!existingOpp) throw new Error("Opportunity not found");
 
     const dataToUpdate = {
-        ...prepareDataForFirestore(formData),
+        ...formData,
+        grades: formData.grades.map(Number),
+        deadline: Timestamp.fromDate(formData.deadline),
+        summary: formData.description.substring(0, 100) + '...',
         // Preserve original status if admin is editing, otherwise reset to pending
         status: user.role === 'admin' ? existingOpp.status : 'pending',
     };
 
-    await updateDoc(oppDocRef, dataToUpdate);
+    await updateDoc(oppDocRef, dataToUpdate as any);
   };
 
   const updateOpportunityStatus = async (id:string, status: OpportunityStatus) => {
