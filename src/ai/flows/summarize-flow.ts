@@ -40,6 +40,10 @@ const summarizeDescriptionFlow = ai.defineFlow(
   },
   async (input) => {
     const {output} = await prompt(input);
-    return output!;
+    // Handle cases where the model returns null or an empty response
+    if (output === null || output === undefined) {
+      return "";
+    }
+    return output;
   }
 );
