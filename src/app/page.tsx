@@ -31,7 +31,7 @@ export default function Home() {
       <Header />
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="relative py-20 md:py-40 text-center overflow-hidden bg-grid-black/[0.1] dark:bg-grid-white/[0.05]">
+        <section className="relative py-20 md:py-40 text-center overflow-hidden bg-grid-black/[0.1] dark:bg-grid-white/[0.2]">
            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm"></div>
           <div className="container mx-auto px-4 relative">
             <h1 className="text-4xl md:text-6xl font-headline font-bold mb-4 tracking-tight text-foreground">
@@ -53,7 +53,7 @@ export default function Home() {
         <section className="py-16 md:py-24 bg-secondary/30">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-               <h2 className="text-3xl md:text-4xl font-headline font-bold mb-4">
+               <h2 className="text-3xl md:text-4xl font-headline font-bold mb-4 text-foreground">
                 A Glimpse of What Awaits You
               </h2>
                <p className="text-lg max-w-3xl mx-auto text-muted-foreground">
