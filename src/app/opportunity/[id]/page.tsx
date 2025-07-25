@@ -1,5 +1,5 @@
 'use client';
-
+export const runtime = 'edge';
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOpportunities } from "@/contexts/OpportunityContext";
