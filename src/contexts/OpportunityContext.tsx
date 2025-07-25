@@ -15,13 +15,25 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { useAuth } from './AuthContext';
+import * as z from 'zod';
 
-// Define a type for the data coming directly from the form
-type OpportunityFormData = Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'submittedBy' | 'deadline' | 'grades'> & {
-  deadline: Date;
-  grades: string[];
-};
-
+// Re-define the schema here to represent the raw form data.
+const opportunityFormSchema = z.object({
+  title: z.string(),
+  type: z.enum(['MUN', 'Internship', 'Volunteering', 'Competition', 'Bootcamp', 'Hackathon', 'Workshop']),
+  description: z.string(),
+  subject: z.string(),
+  grades: z.array(z.string()),
+  price: z.enum(['Free', 'Paid']),
+  audience: z.enum(['All Nationalities', 'Emiratis Only']),
+  format: z.enum(['Online', 'Offline']),
+  deadline: z.date(),
+  emirate: z.enum(["Abu Dhabi", "Ajman", "Dubai", "Fujairah", "Ras Al Khaimah", "Sharjah", "Umm Al Quwain", "All Emirates"]),
+  registrationLink: z.string().optional(),
+  detailsLink: z.string().optional(),
+  imageUrl: z.string().optional(),
+});
+type OpportunityFormData = z.infer<typeof opportunityFormSchema>;
 
 interface OpportunityContextType {
   opportunities: Opportunity[];
@@ -51,6 +63,9 @@ export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
       });
       setOpportunities(opportunitiesData);
       setLoading(false);
+    }, (error) => {
+        console.error("Error fetching opportunities:", error);
+        setLoading(false);
     });
 
     return () => unsubscribe();
@@ -63,14 +78,14 @@ export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
   const addOpportunity = async (opportunityData: OpportunityFormData) => {
     if (!user) throw new Error("User not authenticated");
 
-    // All data processing happens here, before saving to Firestore
     const dataToSave = {
       ...opportunityData,
       deadline: Timestamp.fromDate(opportunityData.deadline),
       grades: opportunityData.grades.map(Number),
       status: user.role === 'admin' ? 'approved' : 'pending',
       submittedBy: user.id,
-      createdAt: serverTimestamp()
+      createdAt: serverTimestamp(),
+      summary: opportunityData.description.substring(0, 100) + '...' // Simple summary
     };
     
     await addDoc(collection(db, 'opportunities'), dataToSave);
@@ -80,13 +95,15 @@ export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
     if (!user) throw new Error("User not authenticated");
     const oppDocRef = doc(db, 'opportunities', id);
     
-    // Process data just before updating
-    const dataToUpdate = {
+    const existingOpp = getOpportunityById(id);
+    if (!existingOpp) throw new Error("Opportunity not found");
+
+    const dataToUpdate: Partial<Opportunity> & { deadline: Timestamp, grades: number[] } = {
         ...updatedData,
         deadline: Timestamp.fromDate(updatedData.deadline),
         grades: updatedData.grades.map(Number),
-        // If a non-admin edits, status goes to pending. If admin edits, status is preserved.
-        status: user.role === 'admin' ? getOpportunityById(id)?.status || 'approved' : 'pending'
+        status: user.role === 'admin' ? existingOpp.status : 'pending',
+        summary: updatedData.description.substring(0, 100) + '...'
     };
 
     await updateDoc(oppDocRef, dataToUpdate as any);
