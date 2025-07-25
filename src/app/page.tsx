@@ -1,7 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowRight, Search, CheckCircle, Globe, Briefcase } from 'lucide-react';
+import { ArrowRight, Code, Trophy, Users } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -30,25 +30,20 @@ export default function Home() {
 
 
   const features = [
-    {
-      icon: Search,
-      title: 'Easy Access to Events',
-      description: 'Find all UAE youth opportunities in one centralized platform.',
-    },
-    {
-      icon: CheckCircle,
-      title: 'Verified Opportunities',
-      description: 'All opportunities are reviewed and verified by our team.',
-    },
-    {
-      icon: Globe,
-      title: 'Both Emirati & All-Nationality Filters',
-      description: 'Filter opportunities based on nationality requirements.',
-    },
      {
-      icon: Briefcase,
-      title: 'Online & Offline Listings',
-      description: 'Discover both virtual and in-person opportunities.',
+      icon: Code,
+      title: 'Bootcamps',
+      description: 'Intensive, short-term training programs to build in-demand skills.',
+    },
+    {
+      icon: Trophy,
+      title: 'Hackathons & Competitions',
+      description: 'Showcase your talents and solve real-world challenges.',
+    },
+    {
+      icon: Users,
+      title: 'Volunteering',
+      description: 'Gain meaningful experience while giving back to the community.',
     },
   ];
 
@@ -57,7 +52,8 @@ export default function Home() {
       <Header />
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="relative py-20 md:py-40 text-center">
+        <section className="relative py-20 md:py-40 text-center bg-grid-white/[0.1]">
+           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm"></div>
           <div className="container mx-auto px-4 relative">
             <h1 className="text-4xl md:text-6xl font-headline font-bold mb-4 tracking-tight">
               Discover More <span className="text-primary">Opportunities</span> for UAE Youth
@@ -73,25 +69,19 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Why Choose Us Section */}
-        <section className="py-16 md:py-24">
-          <div className="container mx-auto px-4 text-center">
-             <h2 className="text-3xl md:text-4xl font-headline font-bold mb-4">
-              Why Choose Us?
-            </h2>
-             <p className="text-lg max-w-3xl mx-auto text-muted-foreground">
-                UAE students often miss valuable opportunities due to scattered information across different platforms and organizations. We solve this by creating a centralized hub where all youth opportunities are verified, organized, and easily accessible.
-            </p>
-          </div>
-        </section>
         
         {/* Everything You Need Section */}
         <section className="py-16 md:py-24 bg-secondary/30">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-headline font-bold text-center mb-12">
-              Everything You Need in One Place
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="text-center mb-12">
+               <h2 className="text-3xl md:text-4xl font-headline font-bold mb-4">
+                A Glimpse of What Awaits You
+              </h2>
+               <p className="text-lg max-w-3xl mx-auto text-muted-foreground">
+                  Explore diverse opportunities tailored for your growth and success.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {features.map((feature, index) => (
                 <Card key={index} className="text-center bg-card/50 backdrop-blur-sm border-border/20 rounded-xl transition-all duration-300 hover:shadow-lg hover:border-primary/30 hover:-translate-y-1">
                   <CardHeader>
