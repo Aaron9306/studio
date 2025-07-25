@@ -14,7 +14,6 @@ import {
   orderBy
 } from 'firebase/firestore';
 import { useAuth } from './AuthContext';
-import { summarizeDescription } from '@/ai/flows/summarize-flow';
 
 interface OpportunityContextType {
   opportunities: Opportunity[];
@@ -55,10 +54,9 @@ export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
 
   const addOpportunity = async (opportunityData: Omit<Opportunity, 'id' | 'status'| 'createdAt' | 'summary' | 'grades'> & { grades: number[] }) => {
     if (!user) throw new Error("User not authenticated");
-    const summary = await summarizeDescription({description: opportunityData.description});
+    
     await addDoc(collection(db, 'opportunities'), {
       ...opportunityData,
-      summary,
       status: 'pending',
       submittedBy: user.id,
       createdAt: serverTimestamp()
@@ -67,14 +65,8 @@ export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
   
   const updateOpportunity = async (id: string, updatedData: Partial<Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'summary'>>) => {
     const oppDocRef = doc(db, 'opportunities', id);
-    let summary;
-    if (updatedData.description) {
-      summary = await summarizeDescription({description: updatedData.description});
-    }
-
     await updateDoc(oppDocRef, {
         ...updatedData,
-        ...(summary && { summary }),
         status: 'pending'
     });
   };

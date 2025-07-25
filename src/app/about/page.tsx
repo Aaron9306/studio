@@ -9,16 +9,16 @@ export default function AboutPage() {
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
       <main className="flex-grow container mx-auto px-4 py-16">
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary">About UAE Opportunities Hub</h1>
+        <div className="text-center mb-24">
+          <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary-foreground">About UAE Opportunities Hub</h1>
           <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
             Your centralized hub for discovering extracurricular opportunities in the UAE.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="grid md:grid-cols-2 gap-16 items-center">
           <div className="space-y-6">
-            <h2 className="text-3xl font-headline font-semibold">The Problem We Solve</h2>
+            <h2 className="text-3xl font-headline font-semibold text-primary-foreground">The Problem We Solve</h2>
             <p className="text-muted-foreground leading-relaxed">
               Many incredible extracurricular opportunities—internships, volunteering roles, competitions, and more—are available across the UAE. However, these are often scattered across different websites, social media channels, and school notice boards. For ambitious students, finding relevant and timely opportunities can be a frustrating and time-consuming scavenger hunt.
             </p>
@@ -26,25 +26,24 @@ export default function AboutPage() {
               Most students simply don't know where to look, and as a result, they miss out on valuable experiences that could shape their futures.
             </p>
           </div>
-          <div>
+          <div className="relative h-80 rounded-xl shadow-2xl shadow-primary/10">
             <Image
               src="https://lassonde.utah.edu/wp/wp-content/uploads/2023/11/AdobeStock_495433763-1920x1080.jpeg"
               alt="Students collaborating"
-              width={600}
-              height={400}
-              className="rounded-lg shadow-xl object-cover"
+              fill
+              className="rounded-xl object-cover"
               data-ai-hint="collaboration students"
             />
           </div>
         </div>
 
-        <div className="mt-24">
+        <div className="mt-32">
           <div className="text-center">
-             <h2 className="text-3xl font-headline font-semibold">Our Mission</h2>
+             <h2 className="text-3xl font-headline font-semibold text-primary-foreground">Our Mission</h2>
              <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">We are dedicated to bridging the information gap and empowering the next generation of leaders in the UAE.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-            <Card className="text-center border-t-4 border-primary">
+            <Card className="text-center bg-card/50 backdrop-blur-sm border-border/20 rounded-xl transition-all duration-300 hover:shadow-lg hover:border-primary/30 hover:-translate-y-1">
               <CardHeader>
                 <div className="mx-auto bg-primary/10 rounded-full p-4 w-fit">
                   <Target className="h-8 w-8 text-primary" />
@@ -57,7 +56,7 @@ export default function AboutPage() {
                 </p>
               </CardContent>
             </Card>
-            <Card className="text-center border-t-4 border-primary">
+            <Card className="text-center bg-card/50 backdrop-blur-sm border-border/20 rounded-xl transition-all duration-300 hover:shadow-lg hover:border-primary/30 hover:-translate-y-1">
               <CardHeader>
                 <div className="mx-auto bg-primary/10 rounded-full p-4 w-fit">
                   <Lightbulb className="h-8 w-8 text-primary" />
@@ -70,7 +69,7 @@ export default function AboutPage() {
                 </p>
               </CardContent>
             </Card>
-            <Card className="text-center border-t-4 border-primary">
+            <Card className="text-center bg-card/50 backdrop-blur-sm border-border/20 rounded-xl transition-all duration-300 hover:shadow-lg hover:border-primary/30 hover:-translate-y-1">
               <CardHeader>
                 <div className="mx-auto bg-primary/10 rounded-full p-4 w-fit">
                   <Users className="h-8 w-8 text-primary" />

@@ -23,6 +23,7 @@ import { Calendar } from '../ui/calendar';
 import { Label } from '../ui/label';
 import { Timestamp } from 'firebase/firestore';
 import { Badge } from '../ui/badge';
+import { summarizeDescription } from '@/ai/flows/summarize-flow';
 
 const opportunitySchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.'),
@@ -116,10 +117,13 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
       return;
     }
 
+    const summary = await summarizeDescription({description: values.description});
+
     const submissionData = {
         ...values,
         deadline: Timestamp.fromDate(values.deadline),
         grades: values.grades.map(Number),
+        summary,
     };
 
     try {

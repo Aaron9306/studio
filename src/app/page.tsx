@@ -1,7 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowRight, Target, Lightbulb, Users, Laptop, Code, HandHeart } from 'lucide-react';
+import { ArrowRight, Search, CheckCircle, Globe, Briefcase } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -12,37 +12,43 @@ export default function Home() {
   const { theme, resolvedTheme, setTheme } = useTheme();
 
   useEffect(() => {
-    // Temporarily force light theme on homepage mount
-    const originalTheme = theme;
-    document.documentElement.classList.remove('dark');
-    document.documentElement.classList.add('light');
+    // This will apply the new dark theme by default on the homepage
+    document.documentElement.classList.add('dark');
+    document.documentElement.style.setProperty('color-scheme', 'dark');
+    
+    // We remove the light theme class if it exists
+    document.documentElement.classList.remove('light');
 
-    // Cleanup on unmount
+    // On unmount, we can revert this if needed, but for a consistent
+    // dark theme on the homepage, we can just leave it.
     return () => {
-      // Revert to the original theme setting
-      if (originalTheme === 'dark' || (originalTheme === 'system' && resolvedTheme === 'dark')) {
-         document.documentElement.classList.remove('light');
-         document.documentElement.classList.add('dark');
-      }
+      // If you wanted to revert to system theme on leaving the page:
+      // document.documentElement.classList.remove('dark');
+      // document.documentElement.style.removeProperty('color-scheme');
     };
-  }, [theme, resolvedTheme]);
+  }, []);
 
 
-  const opportunityTypes = [
+  const features = [
     {
-      icon: Laptop,
-      title: 'Bootcamps',
-      description: 'Acquire new skills and accelerate your learning with intensive workshops.',
+      icon: Search,
+      title: 'Easy Access to Events',
+      description: 'Find all UAE youth opportunities in one centralized platform.',
     },
     {
-      icon: Code,
-      title: 'Hackathons & Competitions',
-      description: 'Test your skills, solve challenges, and win amazing prizes.',
+      icon: CheckCircle,
+      title: 'Verified Opportunities',
+      description: 'All opportunities are reviewed and verified by our team.',
     },
     {
-      icon: HandHeart,
-      title: 'Volunteering',
-      description: 'Make a positive impact in your community and support great causes.',
+      icon: Globe,
+      title: 'Both Emirati & All-Nationality Filters',
+      description: 'Filter opportunities based on nationality requirements.',
+    },
+     {
+      icon: Briefcase,
+      title: 'Online & Offline Listings',
+      description: 'Discover both virtual and in-person opportunities.',
     },
   ];
 
@@ -51,101 +57,54 @@ export default function Home() {
       <Header />
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="relative py-20 md:py-32 bg-primary text-primary-foreground text-center overflow-hidden">
-          <div className="absolute inset-0 bg-grid-white/[0.1] [mask-image:linear-gradient(to_bottom,white_5%,transparent_90%)]"></div>
+        <section className="relative py-20 md:py-40 text-center">
           <div className="container mx-auto px-4 relative">
             <h1 className="text-4xl md:text-6xl font-headline font-bold mb-4 tracking-tight">
-              Unlock Your Potential in the UAE
+              Discover More <span className="text-primary">Opportunities</span> for UAE Youth
             </h1>
-            <p className="text-lg md:text-xl max-w-3xl mx-auto mb-8 text-primary-foreground/80">
-              Your central hub for internships, volunteering, competitions, and more. Discover opportunities that build your future.
+            <p className="text-lg md:text-xl max-w-3xl mx-auto mb-8 text-muted-foreground">
+              Your gateway to internships, competitions, volunteering, and educational programs designed specifically for young talents in the UAE.
             </p>
             <Link href="/signup">
-              <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 transform hover:scale-105 transition-transform duration-300">
-                Explore Opportunities <ArrowRight className="ml-2 h-5 w-5" />
+              <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                See More <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
           </div>
         </section>
 
-        {/* What We Offer Section */}
-        <section className="py-16 md:py-24 bg-background">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-headline font-bold text-center mb-12">
-              A Glimpse of What Awaits You
+        {/* Why Choose Us Section */}
+        <section className="py-16 md:py-24">
+          <div className="container mx-auto px-4 text-center">
+             <h2 className="text-3xl md:text-4xl font-headline font-bold mb-4">
+              Why Choose Us?
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {opportunityTypes.map((type, index) => (
-                <Card key={index} className="text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                  <CardHeader>
-                    <div className="mx-auto bg-primary/10 rounded-full p-4 w-fit mb-4">
-                      <type.icon className="h-8 w-8 text-primary" />
-                    </div>
-                    <CardTitle className="font-headline text-2xl">{type.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">{type.description}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            <div className="text-center mt-12">
-              <Link href="/dashboard">
-                <Button size="lg" variant="outline">
-                  See More Opportunities <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-            </div>
+             <p className="text-lg max-w-3xl mx-auto text-muted-foreground">
+                UAE students often miss valuable opportunities due to scattered information across different platforms and organizations. We solve this by creating a centralized hub where all youth opportunities are verified, organized, and easily accessible.
+            </p>
           </div>
         </section>
         
-        {/* Our Mission Section */}
-        <section className="py-16 md:py-24 bg-secondary">
-           <div className="container mx-auto px-4">
-            <div className="text-center">
-               <h2 className="text-3xl md:text-4xl font-headline font-bold">Our Mission</h2>
-               <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">We are dedicated to bridging the information gap and empowering the next generation of leaders in the UAE.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-              <Card className="text-center bg-card/50">
-                <CardHeader>
-                  <div className="mx-auto bg-primary/10 rounded-full p-3 w-fit">
-                    <Target className="h-8 w-8 text-primary" />
-                  </div>
-                  <CardTitle className="font-headline mt-4 text-xl">Centralize Access</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">
-                    To bring every youth opportunity into one simple, powerful platform.
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="text-center bg-card/50">
-                <CardHeader>
-                  <div className="mx-auto bg-primary/10 rounded-full p-3 w-fit">
-                    <Lightbulb className="h-8 w-8 text-primary" />
-                  </div>
-                  <CardTitle className="font-headline mt-4 text-xl">Simplify Discovery</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">
-                    To provide smart tools that help students instantly find the perfect activity.
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="text-center bg-card/50">
-                <CardHeader>
-                  <div className="mx-auto bg-primary/10 rounded-full p-3 w-fit">
-                    <Users className="h-8 w-8 text-primary" />
-                  </div>
-                  <CardTitle className="font-headline mt-4 text-xl">Empower Futures</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">
-                    To equip the youth with experiences needed to build successful futures.
-                  </p>
-                </CardContent>
-              </Card>
+        {/* Everything You Need Section */}
+        <section className="py-16 md:py-24 bg-secondary/30">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl md:text-4xl font-headline font-bold text-center mb-12">
+              Everything You Need in One Place
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {features.map((feature, index) => (
+                <Card key={index} className="text-center bg-card/50 backdrop-blur-sm border-border/20 rounded-xl transition-all duration-300 hover:shadow-lg hover:border-primary/30 hover:-translate-y-1">
+                  <CardHeader>
+                    <div className="mx-auto bg-primary/10 rounded-full p-4 w-fit mb-4">
+                      <feature.icon className="h-8 w-8 text-primary" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <CardTitle className="font-headline text-xl mb-2">{feature.title}</CardTitle>
+                    <p className="text-muted-foreground text-sm">{feature.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
         </section>
