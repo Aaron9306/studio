@@ -6,7 +6,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useEffect } from 'react';
-import { ForceDarkTheme } from '@/components/ForceDarkTheme';
+import { ForceBlueTheme } from '@/components/ForceDarkTheme';
 
 export default function Home() {
   
@@ -30,7 +30,7 @@ export default function Home() {
 
   return (
     <>
-    <ForceDarkTheme />
+    <ForceBlueTheme />
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
       <main className="flex-grow">
