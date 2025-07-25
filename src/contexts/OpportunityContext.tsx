@@ -17,7 +17,6 @@ import {
 import { useAuth } from './AuthContext';
 import * as z from 'zod';
 
-// This schema represents the raw data coming from the form
 const opportunityFormSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.'),
   type: z.enum(['MUN', 'Internship', 'Volunteering', 'Competition', 'Bootcamp', 'Hackathon', 'Workshop']),
@@ -66,7 +65,6 @@ const prepareDataForFirestore = (data: OpportunityFormData) => {
   
   return preparedData;
 };
-
 
 export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
