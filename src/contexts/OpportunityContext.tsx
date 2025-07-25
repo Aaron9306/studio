@@ -17,35 +17,56 @@ import {
 import { useAuth } from './AuthContext';
 import * as z from 'zod';
 
-// Re-define the schema here to represent the raw form data.
+// This schema represents the raw data coming from the form
 const opportunityFormSchema = z.object({
-  title: z.string(),
+  title: z.string().min(5, 'Title must be at least 5 characters.'),
   type: z.enum(['MUN', 'Internship', 'Volunteering', 'Competition', 'Bootcamp', 'Hackathon', 'Workshop']),
-  description: z.string(),
-  subject: z.string(),
-  grades: z.array(z.string()),
+  description: z.string().min(20, 'Description must be at least 20 characters.'),
+  subject: z.string().min(2, 'Subject is required.'),
+  grades: z.array(z.string()).min(1, 'At least one grade must be selected.'),
   price: z.enum(['Free', 'Paid']),
   audience: z.enum(['All Nationalities', 'Emiratis Only']),
   format: z.enum(['Online', 'Offline']),
   deadline: z.date(),
   emirate: z.enum(["Abu Dhabi", "Ajman", "Dubai", "Fujairah", "Ras Al Khaimah", "Sharjah", "Umm Al Quwain", "All Emirates"]),
-  registrationLink: z.string().optional(),
-  detailsLink: z.string().optional(),
-  imageUrl: z.string().optional(),
+  registrationLink: z.string().url('Must be a valid URL.').optional().or(z.literal('')),
+  detailsLink: z.string().url('Must be a valid URL.').optional().or(z.literal('')),
+  imageUrl: z.string().url('Must be a valid URL.').optional().or(z.literal('')),
 });
 type OpportunityFormData = z.infer<typeof opportunityFormSchema>;
 
 interface OpportunityContextType {
   opportunities: Opportunity[];
   getOpportunityById: (id: string) => Opportunity | undefined;
-  addOpportunity: (opportunity: OpportunityFormData) => Promise<void>;
+  addOpportunity: (data: OpportunityFormData) => Promise<void>;
   updateOpportunityStatus: (id: string, status: OpportunityStatus) => Promise<void>;
-  updateOpportunity: (id: string, updatedOpportunity: OpportunityFormData) => Promise<void>;
+  updateOpportunity: (id: string, data: OpportunityFormData) => Promise<void>;
   deleteOpportunity: (id: string) => Promise<void>;
   loading: boolean;
 }
 
 const OpportunityContext = createContext<OpportunityContextType | undefined>(undefined);
+
+// Helper function to prepare data for Firestore
+const prepareDataForFirestore = (data: OpportunityFormData) => {
+  const preparedData: any = { ...data };
+
+  // Convert deadline to Firestore Timestamp
+  if (data.deadline instanceof Date) {
+    preparedData.deadline = Timestamp.fromDate(data.deadline);
+  }
+
+  // Convert grades from string array to number array
+  if (data.grades) {
+    preparedData.grades = data.grades.map(Number).filter(n => !isNaN(n));
+  }
+
+  // Generate a simple summary
+  preparedData.summary = data.description ? data.description.substring(0, 100) + '...' : '';
+  
+  return preparedData;
+};
+
 
 export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
@@ -75,38 +96,33 @@ export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
     return opportunities.find(opp => opp.id === id);
   };
 
-  const addOpportunity = async (opportunityData: OpportunityFormData) => {
+  const addOpportunity = async (formData: OpportunityFormData) => {
     if (!user) throw new Error("User not authenticated");
 
     const dataToSave = {
-      ...opportunityData,
-      deadline: Timestamp.fromDate(opportunityData.deadline),
-      grades: opportunityData.grades.map(Number),
+      ...prepareDataForFirestore(formData),
       status: user.role === 'admin' ? 'approved' : 'pending',
       submittedBy: user.id,
       createdAt: serverTimestamp(),
-      summary: opportunityData.description.substring(0, 100) + '...' // Simple summary
     };
     
     await addDoc(collection(db, 'opportunities'), dataToSave);
   };
   
-  const updateOpportunity = async (id: string, updatedData: OpportunityFormData) => {
+  const updateOpportunity = async (id: string, formData: OpportunityFormData) => {
     if (!user) throw new Error("User not authenticated");
     const oppDocRef = doc(db, 'opportunities', id);
     
     const existingOpp = getOpportunityById(id);
     if (!existingOpp) throw new Error("Opportunity not found");
 
-    const dataToUpdate: Partial<Opportunity> & { deadline: Timestamp, grades: number[] } = {
-        ...updatedData,
-        deadline: Timestamp.fromDate(updatedData.deadline),
-        grades: updatedData.grades.map(Number),
+    const dataToUpdate = {
+        ...prepareDataForFirestore(formData),
+        // Preserve original status if admin is editing, otherwise reset to pending
         status: user.role === 'admin' ? existingOpp.status : 'pending',
-        summary: updatedData.description.substring(0, 100) + '...'
     };
 
-    await updateDoc(oppDocRef, dataToUpdate as any);
+    await updateDoc(oppDocRef, dataToUpdate);
   };
 
   const updateOpportunityStatus = async (id:string, status: OpportunityStatus) => {

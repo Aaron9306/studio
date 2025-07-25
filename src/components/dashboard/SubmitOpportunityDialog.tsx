@@ -32,7 +32,7 @@ const opportunitySchema = z.object({
   price: z.enum(['Free', 'Paid']),
   audience: z.enum(['All Nationalities', 'Emiratis Only']),
   format: z.enum(['Online', 'Offline']),
-  deadline: z.date(),
+  deadline: z.date({ required_error: 'A deadline date is required.'}),
   emirate: z.enum(["Abu Dhabi", "Ajman", "Dubai", "Fujairah", "Ras Al Khaimah", "Sharjah", "Umm Al Quwain", "All Emirates"]),
   registrationLink: z.string().url('Must be a valid URL.').optional().or(z.literal('')),
   detailsLink: z.string().url('Must be a valid URL.').optional().or(z.literal('')),
@@ -86,7 +86,9 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
           ...opportunityToEdit,
           deadline: opportunityToEdit.deadline.toDate(),
           grades: opportunityToEdit.grades ? opportunityToEdit.grades.map(String) : [],
+          registrationLink: opportunityToEdit.registrationLink || '',
           detailsLink: opportunityToEdit.detailsLink || '',
+          imageUrl: opportunityToEdit.imageUrl || '',
         });
       } else {
           form.reset({
@@ -115,15 +117,12 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
       return;
     }
 
-    // Pass the raw form values to the context. Let the context handle data transformation.
-    const submissionData = values;
-
     try {
       if (opportunityToEdit) {
-        await updateOpportunity(opportunityToEdit.id, submissionData);
+        await updateOpportunity(opportunityToEdit.id, values);
         toast({ title: 'Opportunity Updated', description: user.role === 'admin' ? 'The opportunity has been successfully updated.' : 'Your changes have been submitted for review.' });
       } else {
-        await addOpportunity(submissionData);
+        await addOpportunity(values);
         toast({ title: 'Opportunity Submitted', description: user.role === 'admin' ? 'The opportunity has been added.' : 'Thank you! Your submission is pending review.' });
       }
       
@@ -139,14 +138,14 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
    const handleAddGrade = () => {
     if (currentGrade && !form.getValues('grades').includes(currentGrade)) {
       const currentGrades = form.getValues('grades');
-      form.setValue('grades', [...currentGrades, currentGrade].sort((a,b) => parseInt(a,10) - parseInt(b,10)));
+      form.setValue('grades', [...currentGrades, currentGrade].sort((a,b) => parseInt(a,10) - parseInt(b,10)), { shouldValidate: true });
       setCurrentGrade('');
     }
   };
 
   const handleRemoveGrade = (gradeToRemove: string) => {
     const currentGrades = form.getValues('grades');
-    form.setValue('grades', currentGrades.filter((g) => g !== gradeToRemove));
+    form.setValue('grades', currentGrades.filter((g) => g !== gradeToRemove), { shouldValidate: true });
   };
 
 
@@ -196,7 +195,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                   </PopoverTrigger>
                   <PopoverPortal>
                     <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date("1900-01-01")} initialFocus />
+                      <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
                     </PopoverContent>
                   </PopoverPortal>
                 </Popover><FormMessage /></FormItem>
