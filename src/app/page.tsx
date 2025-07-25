@@ -5,7 +5,6 @@ import { ArrowRight, Code, Trophy, Users, Target, Lightbulb } from 'lucide-react
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { useEffect } from 'react';
 import { ForceBlueTheme } from '@/components/ForceDarkTheme';
 
 export default function Home() {
