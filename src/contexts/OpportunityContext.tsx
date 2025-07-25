@@ -17,21 +17,20 @@ import {
 import { useAuth } from './AuthContext';
 import * as z from 'zod';
 
-// This schema matches the form data structure.
 const opportunityFormSchema = z.object({
-  title: z.string().min(5, 'Title must be at least 5 characters.'),
+  title: z.string().min(5),
   type: z.enum(['MUN', 'Internship', 'Volunteering', 'Competition', 'Bootcamp', 'Hackathon', 'Workshop']),
-  description: z.string().min(20, 'Description must be at least 20 characters.'),
-  subject: z.string().min(2, 'Subject is required.'),
-  grades: z.array(z.string()).min(1, 'At least one grade must be selected.'),
+  description: z.string().min(20),
+  subject: z.string().min(2),
+  grades: z.array(z.string()).min(1),
   price: z.enum(['Free', 'Paid']),
   audience: z.enum(['All Nationalities', 'Emiratis Only']),
   format: z.enum(['Online', 'Offline']),
   deadline: z.date(),
   emirate: z.enum(["Abu Dhabi", "Ajman", "Dubai", "Fujairah", "Ras Al Khaimah", "Sharjah", "Umm Al Quwain", "All Emirates"]),
-  registrationLink: z.string().url('Must be a valid URL.').optional().or(z.literal('')),
-  detailsLink: z.string().url('Must be a valid URL.').optional().or(z.literal('')),
-  imageUrl: z.string().url('Must be a valid URL.').optional().or(z.literal('')),
+  registrationLink: z.string().url().optional().or(z.literal('')),
+  detailsLink: z.string().url().optional().or(z.literal('')),
+  imageUrl: z.string().url().optional().or(z.literal('')),
 });
 type OpportunityFormData = z.infer<typeof opportunityFormSchema>;
 
@@ -46,6 +45,15 @@ interface OpportunityContextType {
 }
 
 const OpportunityContext = createContext<OpportunityContextType | undefined>(undefined);
+
+const prepareDataForFirestore = (formData: OpportunityFormData) => {
+  return {
+    ...formData,
+    deadline: Timestamp.fromDate(formData.deadline),
+    grades: formData.grades.map(Number).sort((a,b) => a - b),
+    summary: formData.description.substring(0, 100) + '...'
+  };
+};
 
 export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
@@ -79,10 +87,7 @@ export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
     if (!user) throw new Error("User not authenticated");
 
     const dataToSave = {
-      ...formData,
-      grades: formData.grades.map(Number),
-      deadline: Timestamp.fromDate(formData.deadline),
-      summary: formData.description.substring(0, 100) + '...',
+      ...prepareDataForFirestore(formData),
       status: user.role === 'admin' ? 'approved' : 'pending',
       submittedBy: user.id,
       createdAt: serverTimestamp(),
@@ -94,16 +99,11 @@ export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
   const updateOpportunity = async (id: string, formData: OpportunityFormData) => {
     if (!user) throw new Error("User not authenticated");
     const oppDocRef = doc(db, 'opportunities', id);
-    
     const existingOpp = getOpportunityById(id);
     if (!existingOpp) throw new Error("Opportunity not found");
 
     const dataToUpdate = {
-        ...formData,
-        grades: formData.grades.map(Number),
-        deadline: Timestamp.fromDate(formData.deadline),
-        summary: formData.description.substring(0, 100) + '...',
-        // Preserve original status if admin is editing, otherwise reset to pending
+        ...prepareDataForFirestore(formData),
         status: user.role === 'admin' ? existingOpp.status : 'pending',
     };
 

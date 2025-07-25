@@ -47,6 +47,22 @@ const gradeOptions = Array.from({ length: 12 }, (_, i) => ({
   label: `Grade ${i + 1}`,
 }));
 
+const defaultFormValues = {
+  title: '',
+  type: 'Internship' as OpportunityType,
+  description: '',
+  subject: '',
+  grades: [],
+  price: 'Free' as 'Free' | 'Paid',
+  audience: 'All Nationalities' as 'All Nationalities' | 'Emiratis Only',
+  format: 'Offline' as 'Online' | 'Offline',
+  deadline: new Date(),
+  emirate: 'All Emirates' as Emirate | 'All Emirates',
+  registrationLink: '',
+  detailsLink: '',
+  imageUrl: '',
+};
+
 interface SubmitOpportunityDialogProps {
   opportunityToEdit?: Opportunity;
   trigger: React.ReactNode;
@@ -62,21 +78,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
 
   const form = useForm<z.infer<typeof opportunitySchema>>({
     resolver: zodResolver(opportunitySchema),
-    defaultValues: {
-      title: '',
-      type: 'Internship',
-      description: '',
-      subject: '',
-      grades: [],
-      price: 'Free',
-      audience: 'All Nationalities',
-      format: 'Offline',
-      deadline: new Date(),
-      emirate: 'All Emirates',
-      registrationLink: '',
-      detailsLink: '',
-      imageUrl: '',
-    },
+    defaultValues: defaultFormValues,
   });
 
   useEffect(() => {
@@ -91,21 +93,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
           imageUrl: opportunityToEdit.imageUrl || '',
         });
       } else {
-          form.reset({
-              title: '',
-              type: 'Internship',
-              description: '',
-              subject: '',
-              grades: [],
-              price: 'Free',
-              audience: 'All Nationalities',
-              format: 'Offline',
-              deadline: new Date(),
-              emirate: 'All Emirates',
-              registrationLink: '',
-              detailsLink: '',
-              imageUrl: '',
-          });
+          form.reset(defaultFormValues);
       }
     }
   }, [opportunityToEdit, form, open]);
@@ -126,7 +114,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
         toast({ title: 'Opportunity Submitted', description: user.role === 'admin' ? 'The opportunity has been added.' : 'Thank you! Your submission is pending review.' });
       }
       
-      form.reset();
+      form.reset(defaultFormValues);
       setOpen(false);
       onSuccess?.();
     } catch(e) {
@@ -162,7 +150,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
                 <FormItem><FormLabel>Title</FormLabel><FormControl><Input placeholder="e.g., AI Hackathon 2024" {...field} /></FormControl><FormMessage /></FormItem>
             )}/>
             <FormField control={form.control} name="type" render={({ field }) => (
-                <FormItem><FormLabel>Type</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormItem><FormLabel>Type</FormLabel><Select onValueChange={field.onChange} value={field.value}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Select a type" /></SelectTrigger></FormControl>
                     <SelectContent>{opportunityTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
                 </Select><FormMessage /></FormItem>
