@@ -14,7 +14,6 @@ import {
   orderBy
 } from 'firebase/firestore';
 import { useAuth } from './AuthContext';
-import { summarizeDescription } from '@/ai/flows/summarize-flow';
 
 interface OpportunityContextType {
   opportunities: Opportunity[];
@@ -56,12 +55,8 @@ export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
   const addOpportunity = async (opportunityData: Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'summary' | 'ageRange'>) => {
     if (!user) throw new Error("User not authenticated");
     
-    const summary = await summarizeDescription({description: opportunityData.description});
-    const { ageRange, ...restOfData } = opportunityData as any;
-
     await addDoc(collection(db, 'opportunities'), {
-      ...restOfData,
-      summary,
+      ...opportunityData,
       grades: opportunityData.grades.map(Number), // Ensure grades are numbers
       status: 'pending',
       submittedBy: user.id,
@@ -71,20 +66,15 @@ export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
   
   const updateOpportunity = async (id: string, updatedData: Partial<Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'summary' | 'ageRange'>>) => {
     const oppDocRef = doc(db, 'opportunities', id);
-    let summary;
+    
+    const dataToUpdate: any = { ...updatedData };
 
-    if (updatedData.description) {
-      summary = await summarizeDescription({description: updatedData.description});
+    if (updatedData.grades) {
+        dataToUpdate.grades = updatedData.grades.map(Number);
     }
+    dataToUpdate.status = 'pending';
 
-    const { ageRange, ...restOfData } = updatedData as any;
-
-    await updateDoc(oppDocRef, {
-        ...restOfData,
-        ...(updatedData.grades && { grades: updatedData.grades.map(Number) }), // Ensure grades are numbers
-        ...(summary && { summary }), // only include summary if it was generated
-        status: 'pending'
-    });
+    await updateDoc(oppDocRef, dataToUpdate);
   };
 
   const updateOpportunityStatus = async (id:string, status: OpportunityStatus) => {

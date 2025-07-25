@@ -1,2 +1,2 @@
-// Flows will be imported for their side effects in this file.
-import './flows/summarize-flow';
+// This file is intentionally left blank as flows are no longer used.
+// You can add new flow imports here in the future.
