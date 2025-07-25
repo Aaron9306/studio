@@ -57,10 +57,12 @@ export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
     if (!user) throw new Error("User not authenticated");
     
     const summary = await summarizeDescription({description: opportunityData.description});
+    const { ageRange, ...restOfData } = opportunityData as any;
 
     await addDoc(collection(db, 'opportunities'), {
-      ...opportunityData,
+      ...restOfData,
       summary,
+      grades: opportunityData.grades.map(Number), // Ensure grades are numbers
       status: 'pending',
       submittedBy: user.id,
       createdAt: serverTimestamp()
@@ -75,8 +77,11 @@ export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
       summary = await summarizeDescription({description: updatedData.description});
     }
 
+    const { ageRange, ...restOfData } = updatedData as any;
+
     await updateDoc(oppDocRef, {
-        ...updatedData,
+        ...restOfData,
+        ...(updatedData.grades && { grades: updatedData.grades.map(Number) }), // Ensure grades are numbers
         ...(summary && { summary }), // only include summary if it was generated
         status: 'pending'
     });
