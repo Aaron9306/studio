@@ -125,7 +125,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
     try {
       if (opportunityToEdit) {
         await updateOpportunity(opportunityToEdit.id, submissionData);
-        toast({ title: 'Opportunity Updated', description: 'Your changes have been submitted for review.' });
+        toast({ title: 'Opportunity Updated', description: user.role === 'admin' ? 'The opportunity has been successfully updated.' : 'Your changes have been submitted for review.' });
       } else {
         await addOpportunity(submissionData);
         toast({ title: 'Opportunity Submitted', description: 'Thank you! Your submission is pending review.' });

@@ -57,14 +57,15 @@ export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
     
     await addDoc(collection(db, 'opportunities'), {
       ...opportunityData,
-      grades: opportunityData.grades.map(Number), // Ensure grades are numbers
-      status: 'pending',
+      grades: opportunityData.grades.map(Number),
+      status: user.role === 'admin' ? 'approved' : 'pending',
       submittedBy: user.id,
       createdAt: serverTimestamp()
     });
   };
   
   const updateOpportunity = async (id: string, updatedData: Partial<Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'summary' | 'ageRange'>>) => {
+    if (!user) throw new Error("User not authenticated");
     const oppDocRef = doc(db, 'opportunities', id);
     
     const dataToUpdate: any = { ...updatedData };
@@ -72,7 +73,11 @@ export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
     if (updatedData.grades) {
         dataToUpdate.grades = updatedData.grades.map(Number);
     }
-    dataToUpdate.status = 'pending';
+    
+    // Only reset status to pending if a non-admin is editing
+    if (user.role !== 'admin') {
+      dataToUpdate.status = 'pending';
+    }
 
     await updateDoc(oppDocRef, dataToUpdate);
   };
