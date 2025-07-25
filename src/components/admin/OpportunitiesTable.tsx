@@ -27,7 +27,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { useOpportunities } from "@/contexts/OpportunityContext";
+import { useTransition } from "react";
+import { deleteOpportunity, updateOpportunityStatus } from "@/lib/actions";
+import { useToast } from "@/hooks/use-toast";
 
 interface OpportunitiesTableProps {
   opportunities: Opportunity[];
@@ -35,7 +37,9 @@ interface OpportunitiesTableProps {
 }
 
 export function OpportunitiesTable({ opportunities, type }: OpportunitiesTableProps) {
-    const { updateOpportunityStatus, deleteOpportunity } = useOpportunities();
+    const [isPending, startTransition] = useTransition();
+    const { toast } = useToast();
+
   if (opportunities.length === 0) {
     return (
       <Card>
@@ -47,12 +51,31 @@ export function OpportunitiesTable({ opportunities, type }: OpportunitiesTablePr
   }
 
   const handleStatusChange = (id: string, status: 'approved' | 'rejected') => {
-    if (status === 'rejected') {
-      deleteOpportunity(id);
-    } else {
-      updateOpportunityStatus(id, status);
-    }
+    startTransition(async () => {
+        try {
+            if (status === 'rejected') {
+                await deleteOpportunity(id);
+                toast({ title: "Opportunity Rejected", description: "The submission has been deleted." });
+            } else {
+                await updateOpportunityStatus(id, status);
+                toast({ title: "Opportunity Approved", description: "The opportunity is now live." });
+            }
+        } catch (error) {
+            toast({ variant: 'destructive', title: "Error", description: "Could not update the opportunity status." });
+        }
+    });
   };
+
+  const handleDelete = (id: string) => {
+    startTransition(async () => {
+        try {
+            await deleteOpportunity(id);
+            toast({ title: "Opportunity Deleted", description: "The opportunity has been permanently removed." });
+        } catch (error) {
+            toast({ variant: 'destructive', title: "Error", description: "Could not delete the opportunity." });
+        }
+    });
+  }
 
   return (
     <Card>
@@ -79,10 +102,10 @@ export function OpportunitiesTable({ opportunities, type }: OpportunitiesTablePr
                   <TableCell className="text-right space-x-2">
                     {type === 'pending' && (
                         <>
-                        <Button variant="outline" size="icon" className="text-green-600" onClick={() => handleStatusChange(opp.id, 'approved')}>
+                        <Button variant="outline" size="icon" className="text-green-600" onClick={() => handleStatusChange(opp.id, 'approved')} disabled={isPending}>
                             <Check className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="icon" className="text-red-600" onClick={() => handleStatusChange(opp.id, 'rejected')}>
+                        <Button variant="outline" size="icon" className="text-red-600" onClick={() => handleStatusChange(opp.id, 'rejected')} disabled={isPending}>
                             <X className="h-4 w-4" />
                         </Button>
                         </>
@@ -90,14 +113,14 @@ export function OpportunitiesTable({ opportunities, type }: OpportunitiesTablePr
                      <SubmitOpportunityDialog
                         opportunityToEdit={opp}
                         trigger={
-                            <Button variant="outline" size="icon">
+                            <Button variant="outline" size="icon" disabled={isPending}>
                                 <Edit className="h-4 w-4" />
                             </Button>
                         }
                      />
                      <AlertDialog>
                         <AlertDialogTrigger asChild>
-                             <Button variant="destructive" size="icon">
+                             <Button variant="destructive" size="icon" disabled={isPending}>
                                 <Trash className="h-4 w-4" />
                             </Button>
                         </AlertDialogTrigger>
@@ -110,7 +133,7 @@ export function OpportunitiesTable({ opportunities, type }: OpportunitiesTablePr
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => deleteOpportunity(opp.id)}>Delete</AlertDialogAction>
+                            <AlertDialogAction onClick={() => handleDelete(opp.id)}>Delete</AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>

@@ -10,11 +10,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
-import { useOpportunities } from '@/contexts/OpportunityContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Opportunity, OpportunityType, Emirate } from '@/lib/types';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { Popover, PopoverContent, PopoverTrigger, PopoverPortal } from '../ui/popover';
 import { CalendarIcon, X as XIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -22,8 +21,10 @@ import { format as formatDate } from 'date-fns';
 import { Calendar } from '../ui/calendar';
 import { Label } from '../ui/label';
 import { Badge } from '../ui/badge';
+import { createOrUpdateOpportunity } from '@/lib/actions';
 
 const opportunitySchema = z.object({
+  id: z.string().optional(),
   title: z.string().min(5, 'Title must be at least 5 characters.'),
   type: z.enum(['MUN', 'Internship', 'Volunteering', 'Competition', 'Bootcamp', 'Hackathon', 'Workshop']),
   description: z.string().min(20, 'Description must be at least 20 characters.'),
@@ -70,11 +71,11 @@ interface SubmitOpportunityDialogProps {
 }
 
 export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess }: SubmitOpportunityDialogProps) {
-  const { addOpportunity, updateOpportunity } = useOpportunities();
   const { user } = useAuth();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [currentGrade, setCurrentGrade] = useState<string>('');
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<z.infer<typeof opportunitySchema>>({
     resolver: zodResolver(opportunitySchema),
@@ -99,28 +100,32 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
   }, [opportunityToEdit, form, open]);
 
 
-  const onSubmit = async (values: z.infer<typeof opportunitySchema>) => {
+  const onSubmit = (values: z.infer<typeof opportunitySchema>) => {
     if (!user) {
       toast({ variant: 'destructive', title: 'You must be logged in.' });
       return;
     }
+    
+    startTransition(async () => {
+      try {
+        const result = await createOrUpdateOpportunity(values, user.id, user.role);
 
-    try {
-      if (opportunityToEdit) {
-        await updateOpportunity(opportunityToEdit.id, values);
-        toast({ title: 'Opportunity Updated', description: user.role === 'admin' ? 'The opportunity has been successfully updated.' : 'Your changes have been submitted for review.' });
-      } else {
-        await addOpportunity(values);
-        toast({ title: 'Opportunity Submitted', description: user.role === 'admin' ? 'The opportunity has been added.' : 'Thank you! Your submission is pending review.' });
+        if (result.success) {
+            toast({ title: 'Success!', description: opportunityToEdit 
+              ? (user.role === 'admin' ? 'The opportunity has been successfully updated.' : 'Your changes have been submitted for review.')
+              : (user.role === 'admin' ? 'The opportunity has been added.' : 'Thank you! Your submission is pending review.')
+            });
+            form.reset(defaultFormValues);
+            setOpen(false);
+            onSuccess?.();
+        } else {
+           toast({ variant: 'destructive', title: 'Submission failed', description: result.error || 'Could not save the opportunity. Please try again.'})
+        }
+      } catch(e) {
+          console.error("Submission Failed:", e);
+          toast({ variant: 'destructive', title: 'Submission failed', description: 'An unexpected error occurred. Please try again.'});
       }
-      
-      form.reset(defaultFormValues);
-      setOpen(false);
-      onSuccess?.();
-    } catch(e) {
-        console.error("Submission Failed:", e)
-        toast({ variant: 'destructive', title: 'Submission failed', description: 'Could not save the opportunity. Please try again.'})
-    }
+    });
   };
 
    const handleAddGrade = () => {
@@ -258,7 +263,7 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
             )}/>
             <DialogFooter className="pt-4 pr-4">
               <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
-              <Button type="submit" disabled={form.formState.isSubmitting}>{form.formState.isSubmitting ? 'Submitting...' : (opportunityToEdit ? 'Save Changes' : 'Submit for Review')}</Button>
+              <Button type="submit" disabled={isPending}>{isPending ? 'Submitting...' : (opportunityToEdit ? 'Save Changes' : 'Submit for Review')}</Button>
             </DialogFooter>
           </form>
         </Form>
