@@ -27,6 +27,7 @@ export interface Opportunity {
   status: OpportunityStatus;
   submittedBy: string; // user id
   createdAt: Timestamp;
+  ageRange?: number[];
 }
 
 export interface User {
