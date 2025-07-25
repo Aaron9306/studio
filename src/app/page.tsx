@@ -31,7 +31,8 @@ export default function Home() {
       <Header />
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="relative py-20 md:py-40 text-center">
+        <section className="relative py-20 md:py-40 text-center overflow-hidden">
+           <div className="absolute inset-0 bg-grid-white/[0.1]"></div>
            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm"></div>
           <div className="container mx-auto px-4 relative">
             <h1 className="text-4xl md:text-6xl font-headline font-bold mb-4 tracking-tight text-foreground">
