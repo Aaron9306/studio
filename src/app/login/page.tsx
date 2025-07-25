@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AuthFormContainer } from '@/components/AuthFormContainer';
 import Link from 'next/link';
+import { ForceDarkTheme } from '@/components/ForceDarkTheme';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address.'),
@@ -59,6 +60,8 @@ export default function LoginPage() {
   };
 
   return (
+    <>
+    <ForceDarkTheme />
     <AuthFormContainer
       title="Student Login"
       description="Enter your credentials to access your dashboard."
@@ -108,5 +111,6 @@ export default function LoginPage() {
           </form>
         </Form>
     </AuthFormContainer>
+    </>
   );
 }

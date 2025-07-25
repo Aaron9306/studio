@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AuthFormContainer } from '@/components/AuthFormContainer';
+import { ForceDarkTheme } from '@/components/ForceDarkTheme';
 
 const signupSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -65,6 +66,8 @@ export default function SignupPage() {
   };
 
   return (
+    <>
+    <ForceDarkTheme />
     <AuthFormContainer
       title="Create an Account"
       description="Join our community to find your next opportunity."
@@ -119,5 +122,6 @@ export default function SignupPage() {
           </form>
         </Form>
     </AuthFormContainer>
+    </>
   );
 }

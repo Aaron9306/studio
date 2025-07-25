@@ -3,9 +3,12 @@ import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Target, Lightbulb, Users } from 'lucide-react';
 import Image from 'next/image';
+import { ForceDarkTheme } from '@/components/ForceDarkTheme';
 
 export default function AboutPage() {
   return (
+    <>
+    <ForceDarkTheme />
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
       <main className="flex-grow container mx-auto px-4 py-16">
@@ -87,5 +90,6 @@ export default function AboutPage() {
       </main>
       <Footer />
     </div>
+    </>
   );
 }

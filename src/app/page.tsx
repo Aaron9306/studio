@@ -6,26 +6,10 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useEffect } from 'react';
+import { ForceDarkTheme } from '@/components/ForceDarkTheme';
 
 export default function Home() {
   
-  useEffect(() => {
-    // This will apply the new dark theme by default on the homepage
-    document.documentElement.classList.remove('light');
-    document.documentElement.classList.add('dark');
-    document.documentElement.style.setProperty('color-scheme', 'dark');
-    
-
-    // On unmount, we can revert this if needed, but for a consistent
-    // dark theme on the homepage, we can just leave it.
-    return () => {
-      // If you wanted to revert to system theme on leaving the page:
-      // document.documentElement.classList.remove('dark');
-      // document.documentElement.style.removeProperty('color-scheme');
-    };
-  }, []);
-
-
   const features = [
      {
       icon: Code,
@@ -45,6 +29,8 @@ export default function Home() {
   ];
 
   return (
+    <>
+    <ForceDarkTheme />
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
       <main className="flex-grow">
@@ -156,5 +142,6 @@ export default function Home() {
       </main>
       <Footer />
     </div>
+    </>
   );
 }

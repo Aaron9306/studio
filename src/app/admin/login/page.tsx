@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { AuthFormContainer } from '@/components/AuthFormContainer';
+import { ForceDarkTheme } from '@/components/ForceDarkTheme';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address.'),
@@ -54,6 +55,8 @@ export default function AdminLoginPage() {
   };
 
   return (
+    <>
+    <ForceDarkTheme />
     <AuthFormContainer
       title="Admin Login"
       description="Enter admin credentials to access the dashboard."
@@ -95,5 +98,6 @@ export default function AdminLoginPage() {
         </form>
       </Form>
     </AuthFormContainer>
+    </>
   );
 }
