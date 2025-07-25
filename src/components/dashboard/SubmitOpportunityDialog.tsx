@@ -22,7 +22,6 @@ import { format as formatDate } from 'date-fns';
 import { Calendar } from '../ui/calendar';
 import { Label } from '../ui/label';
 import { Timestamp } from 'firebase/firestore';
-import { summarizeDescription } from '@/ai/flows/summarize-flow';
 import { Badge } from '../ui/badge';
 
 const opportunitySchema = z.object({
@@ -117,18 +116,8 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
       return;
     }
 
-    let summary = '';
-    try {
-        summary = await summarizeDescription({ description: values.description });
-    } catch (e) {
-        console.error("AI summary failed, using fallback.", e);
-        summary = values.description.substring(0, 100) + '...';
-    }
-
-
     const submissionData = {
         ...values,
-        summary,
         deadline: Timestamp.fromDate(values.deadline),
         grades: values.grades.map(Number),
     };
