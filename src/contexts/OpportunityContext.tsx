@@ -11,16 +11,17 @@ import {
   doc, 
   serverTimestamp,
   query,
-  orderBy
+  orderBy,
+  Timestamp
 } from 'firebase/firestore';
 import { useAuth } from './AuthContext';
 
 interface OpportunityContextType {
   opportunities: Opportunity[];
   getOpportunityById: (id: string) => Opportunity | undefined;
-  addOpportunity: (opportunity: Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'submittedBy' | 'summary' | 'ageRange'>) => Promise<void>;
+  addOpportunity: (opportunity: Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'submittedBy'>) => Promise<void>;
   updateOpportunityStatus: (id: string, status: OpportunityStatus) => Promise<void>;
-  updateOpportunity: (id: string, updatedOpportunity: Partial<Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'summary' | 'ageRange'>>) => Promise<void>;
+  updateOpportunity: (id: string, updatedOpportunity: Partial<Omit<Opportunity, 'id'>>) => Promise<void>;
   deleteOpportunity: (id: string) => Promise<void>;
   loading: boolean;
 }
@@ -52,29 +53,24 @@ export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
     return opportunities.find(opp => opp.id === id);
   };
 
-  const addOpportunity = async (opportunityData: Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'submittedBy' | 'summary' | 'ageRange'>) => {
+  const addOpportunity = async (opportunityData: Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'submittedBy'>) => {
     if (!user) throw new Error("User not authenticated");
     
     await addDoc(collection(db, 'opportunities'), {
       ...opportunityData,
-      grades: opportunityData.grades.map(Number),
       status: user.role === 'admin' ? 'approved' : 'pending',
       submittedBy: user.id,
       createdAt: serverTimestamp()
     });
   };
   
-  const updateOpportunity = async (id: string, updatedData: Partial<Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'summary' | 'ageRange'>>) => {
+  const updateOpportunity = async (id: string, updatedData: Partial<Omit<Opportunity, 'id' | 'createdAt' | 'submittedBy'>>) => {
     if (!user) throw new Error("User not authenticated");
     const oppDocRef = doc(db, 'opportunities', id);
     
     const dataToUpdate: any = { ...updatedData };
-
-    if (updatedData.grades) {
-        dataToUpdate.grades = updatedData.grades.map(Number);
-    }
     
-    // Only reset status to pending if a non-admin is editing
+    // If a non-admin is editing, reset status to pending
     if (user.role !== 'admin') {
       dataToUpdate.status = 'pending';
     }
