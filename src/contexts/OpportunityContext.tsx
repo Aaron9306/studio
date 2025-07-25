@@ -19,7 +19,7 @@ import { useAuth } from './AuthContext';
 interface OpportunityContextType {
   opportunities: Opportunity[];
   getOpportunityById: (id: string) => Opportunity | undefined;
-  addOpportunity: (opportunity: Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'submittedBy'>) => Promise<void>;
+  addOpportunity: (opportunity: Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'submittedBy' | 'ageRange'>) => Promise<void>;
   updateOpportunityStatus: (id: string, status: OpportunityStatus) => Promise<void>;
   updateOpportunity: (id: string, updatedOpportunity: Partial<Omit<Opportunity, 'id'>>) => Promise<void>;
   deleteOpportunity: (id: string) => Promise<void>;
@@ -53,7 +53,7 @@ export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
     return opportunities.find(opp => opp.id === id);
   };
 
-  const addOpportunity = async (opportunityData: Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'submittedBy'>) => {
+  const addOpportunity = async (opportunityData: Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'submittedBy' | 'ageRange'>) => {
     if (!user) throw new Error("User not authenticated");
     
     await addDoc(collection(db, 'opportunities'), {
@@ -64,14 +64,16 @@ export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
     });
   };
   
-  const updateOpportunity = async (id: string, updatedData: Partial<Omit<Opportunity, 'id' | 'createdAt' | 'submittedBy'>>) => {
+  const updateOpportunity = async (id: string, updatedData: Partial<Omit<Opportunity, 'id'>>) => {
     if (!user) throw new Error("User not authenticated");
     const oppDocRef = doc(db, 'opportunities', id);
     
-    const dataToUpdate: any = { ...updatedData };
+    const dataToUpdate: Partial<Opportunity> = { ...updatedData };
     
-    // If a non-admin is editing, reset status to pending
-    if (user.role !== 'admin') {
+    if (user.role === 'admin') {
+      // Admin is editing, keep status as is unless it's changed in the form
+    } else {
+      // Non-admin is editing, reset status to pending
       dataToUpdate.status = 'pending';
     }
 
