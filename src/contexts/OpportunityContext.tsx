@@ -18,7 +18,7 @@ import { useAuth } from './AuthContext';
 interface OpportunityContextType {
   opportunities: Opportunity[];
   getOpportunityById: (id: string) => Opportunity | undefined;
-  addOpportunity: (opportunity: Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'summary' | 'ageRange'>) => Promise<void>;
+  addOpportunity: (opportunity: Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'submittedBy' | 'summary' | 'ageRange'>) => Promise<void>;
   updateOpportunityStatus: (id: string, status: OpportunityStatus) => Promise<void>;
   updateOpportunity: (id: string, updatedOpportunity: Partial<Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'summary' | 'ageRange'>>) => Promise<void>;
   deleteOpportunity: (id: string) => Promise<void>;
@@ -52,7 +52,7 @@ export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
     return opportunities.find(opp => opp.id === id);
   };
 
-  const addOpportunity = async (opportunityData: Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'summary' | 'ageRange'>) => {
+  const addOpportunity = async (opportunityData: Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'submittedBy' | 'summary' | 'ageRange'>) => {
     if (!user) throw new Error("User not authenticated");
     
     await addDoc(collection(db, 'opportunities'), {
