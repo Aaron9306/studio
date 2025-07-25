@@ -16,12 +16,19 @@ import {
 } from 'firebase/firestore';
 import { useAuth } from './AuthContext';
 
+// Define a type for the data coming directly from the form
+type OpportunityFormData = Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'submittedBy' | 'deadline' | 'grades'> & {
+  deadline: Date;
+  grades: string[];
+};
+
+
 interface OpportunityContextType {
   opportunities: Opportunity[];
   getOpportunityById: (id: string) => Opportunity | undefined;
-  addOpportunity: (opportunity: Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'submittedBy' | 'ageRange'>) => Promise<void>;
+  addOpportunity: (opportunity: OpportunityFormData) => Promise<void>;
   updateOpportunityStatus: (id: string, status: OpportunityStatus) => Promise<void>;
-  updateOpportunity: (id: string, updatedOpportunity: Partial<Omit<Opportunity, 'id'>>) => Promise<void>;
+  updateOpportunity: (id: string, updatedOpportunity: OpportunityFormData) => Promise<void>;
   deleteOpportunity: (id: string) => Promise<void>;
   loading: boolean;
 }
@@ -53,31 +60,36 @@ export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
     return opportunities.find(opp => opp.id === id);
   };
 
-  const addOpportunity = async (opportunityData: Omit<Opportunity, 'id' | 'status' | 'createdAt' | 'submittedBy' | 'ageRange'>) => {
+  const addOpportunity = async (opportunityData: OpportunityFormData) => {
     if (!user) throw new Error("User not authenticated");
-    
-    await addDoc(collection(db, 'opportunities'), {
+
+    // All data processing happens here, before saving to Firestore
+    const dataToSave = {
       ...opportunityData,
+      deadline: Timestamp.fromDate(opportunityData.deadline),
+      grades: opportunityData.grades.map(Number),
       status: user.role === 'admin' ? 'approved' : 'pending',
       submittedBy: user.id,
       createdAt: serverTimestamp()
-    });
+    };
+    
+    await addDoc(collection(db, 'opportunities'), dataToSave);
   };
   
-  const updateOpportunity = async (id: string, updatedData: Partial<Omit<Opportunity, 'id'>>) => {
+  const updateOpportunity = async (id: string, updatedData: OpportunityFormData) => {
     if (!user) throw new Error("User not authenticated");
     const oppDocRef = doc(db, 'opportunities', id);
     
-    const dataToUpdate: Partial<Opportunity> = { ...updatedData };
-    
-    if (user.role === 'admin') {
-      // Admin is editing, keep status as is unless it's changed in the form
-    } else {
-      // Non-admin is editing, reset status to pending
-      dataToUpdate.status = 'pending';
-    }
+    // Process data just before updating
+    const dataToUpdate = {
+        ...updatedData,
+        deadline: Timestamp.fromDate(updatedData.deadline),
+        grades: updatedData.grades.map(Number),
+        // If a non-admin edits, status goes to pending. If admin edits, status is preserved.
+        status: user.role === 'admin' ? getOpportunityById(id)?.status || 'approved' : 'pending'
+    };
 
-    await updateDoc(oppDocRef, dataToUpdate);
+    await updateDoc(oppDocRef, dataToUpdate as any);
   };
 
   const updateOpportunityStatus = async (id:string, status: OpportunityStatus) => {

@@ -21,7 +21,6 @@ import { cn } from '@/lib/utils';
 import { format as formatDate } from 'date-fns';
 import { Calendar } from '../ui/calendar';
 import { Label } from '../ui/label';
-import { Timestamp } from 'firebase/firestore';
 import { Badge } from '../ui/badge';
 
 const opportunitySchema = z.object({
@@ -116,11 +115,8 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
       return;
     }
 
-    const submissionData = {
-        ...values,
-        deadline: Timestamp.fromDate(values.deadline),
-        grades: values.grades.map(Number),
-    };
+    // Pass the raw form values to the context. Let the context handle data transformation.
+    const submissionData = values;
 
     try {
       if (opportunityToEdit) {
@@ -128,14 +124,14 @@ export function SubmitOpportunityDialog({ opportunityToEdit, trigger, onSuccess 
         toast({ title: 'Opportunity Updated', description: user.role === 'admin' ? 'The opportunity has been successfully updated.' : 'Your changes have been submitted for review.' });
       } else {
         await addOpportunity(submissionData);
-        toast({ title: 'Opportunity Submitted', description: 'Thank you! Your submission is pending review.' });
+        toast({ title: 'Opportunity Submitted', description: user.role === 'admin' ? 'The opportunity has been added.' : 'Thank you! Your submission is pending review.' });
       }
       
       form.reset();
       setOpen(false);
       onSuccess?.();
     } catch(e) {
-        console.error(e)
+        console.error("Submission Failed:", e)
         toast({ variant: 'destructive', title: 'Submission failed', description: 'Could not save the opportunity. Please try again.'})
     }
   };
