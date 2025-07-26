@@ -1,3 +1,4 @@
+
 'use client';
 import { Opportunity } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
@@ -8,12 +9,12 @@ import Image from 'next/image';
 import { ArrowRight, Bookmark } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
-import { isPast } from 'date-fns';
+import { isPast, endOfDay } from 'date-fns';
 
 export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
   const { user, toggleBookmark } = useAuth();
   const isBookmarked = user?.bookmarkedOpportunities.includes(opportunity.id);
-  const isClosed = isPast(opportunity.deadline.toDate());
+  const isClosed = isPast(endOfDay(opportunity.deadline.toDate()));
 
   const handleBookmarkClick = (e: React.MouseEvent) => {
     e.preventDefault();

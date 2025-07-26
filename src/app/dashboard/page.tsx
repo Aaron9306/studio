@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useState, useMemo } from 'react';
 import { useOpportunities } from '@/contexts/OpportunityContext';
@@ -10,7 +11,7 @@ import { SubmitOpportunityDialog } from '@/components/dashboard/SubmitOpportunit
 import { useAuth } from '@/contexts/AuthContext';
 import { Opportunity } from '@/lib/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { addMonths, endOfWeek, endOfYear, isPast } from 'date-fns';
+import { addMonths, endOfDay, endOfWeek, endOfYear, isPast } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DashboardPage() {
@@ -43,19 +44,21 @@ export default function DashboardPage() {
       .filter(opp => {
         // Deadline filter logic
         const deadlineDate = opp.deadline.toDate();
+        const deadlineEndOfDay = endOfDay(deadlineDate);
+
         if (filters.deadline === 'all') {
-          if (isPast(deadlineDate)) return false; // Exclude closed opportunities from 'Anytime'
+          if (isPast(deadlineEndOfDay)) return false; // Exclude closed opportunities from 'Anytime'
         } else if (filters.deadline === 'week') {
           const endOfWeekDate = endOfWeek(now, { weekStartsOn: 1 });
-          if (!(deadlineDate >= now && deadlineDate <= endOfWeekDate)) return false;
+          if (!(deadlineEndOfDay >= now && deadlineEndOfDay <= endOfWeekDate)) return false;
         } else if (filters.deadline === 'month') {
           const endOfMonthDate = addMonths(now, 1);
-          if (!(deadlineDate >= now && deadlineDate <= endOfMonthDate)) return false;
+          if (!(deadlineEndOfDay >= now && deadlineEndOfDay <= endOfMonthDate)) return false;
         } else if (filters.deadline === 'year') {
           const endOfYearDate = endOfYear(now);
-          if (!(deadlineDate >= now && deadlineDate <= endOfYearDate)) return false;
+          if (!(deadlineEndOfDay >= now && deadlineEndOfDay <= endOfYearDate)) return false;
         } else if (filters.deadline === 'closed') {
-          if (!isPast(deadlineDate)) return false;
+          if (!isPast(deadlineEndOfDay)) return false;
         }
 
         // Audience filter logic
