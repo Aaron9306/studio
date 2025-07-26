@@ -17,6 +17,9 @@ export default function Footer() {
             <Link href="/dashboard" className="transition-colors hover:text-primary">
               Opportunities
             </Link>
+            <Link href="/contact" className="transition-colors hover:text-primary">
+              Contact
+            </Link>
           </nav>
         </div>
         <div className="text-center text-muted-foreground text-sm mt-8">
