@@ -35,10 +35,13 @@ interface FilterSidebarProps {
 const opportunityTypes = ['MUN', 'Internship', 'Volunteering', 'Competition', 'Bootcamp', 'Hackathon', 'Workshop'];
 const subjects = ['Technology', 'Business', 'Arts & Culture', 'Science', 'Politics', 'Social Work', 'Engineering', 'Health & Medicine', 'Environment'];
 const emirates: Emirate[] = ["Abu Dhabi", "Ajman", "Dubai", "Fujairah", "Ras Al Khaimah", "Sharjah", "Umm Al Quwain"];
-const gradeOptions = Array.from({ length: 12 }, (_, i) => ({
-  value: `${i + 1}`,
-  label: `Grade ${i + 1}`,
-}));
+const gradeOptions = [
+  ...Array.from({ length: 12 }, (_, i) => ({
+    value: `${i + 1}`,
+    label: `Grade ${i + 1}`,
+  })),
+  { value: 'College', label: 'College' }
+];
 
 function GradeFilter({ filters, setFilters }: { filters: Filters, setFilters: Dispatch<SetStateAction<Filters>> }) {
   const [open, setOpen] = useState(false);

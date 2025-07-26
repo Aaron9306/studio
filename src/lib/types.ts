@@ -15,7 +15,7 @@ export interface Opportunity {
   description: string;
   summary?: string;
   subject: string;
-  grades: number[];
+  grades: string[];
   price: OpportunityPrice;
   audience: OpportunityAudience;
   format: OpportunityFormat;

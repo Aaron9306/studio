@@ -24,6 +24,19 @@ const opportunitySchema = z.object({
   imageUrl: z.string().url().optional().or(z.literal('')),
 });
 
+const sortGrades = (grades: string[]) => {
+  return grades.sort((a, b) => {
+    const aIsNumber = !isNaN(Number(a));
+    const bIsNumber = !isNaN(Number(b));
+    if (aIsNumber && bIsNumber) {
+      return Number(a) - Number(b);
+    }
+    if (aIsNumber) return -1;
+    if (bIsNumber) return 1;
+    return a.localeCompare(b); // For 'College' or other text
+  });
+};
+
 export async function createOrUpdateOpportunity(
     formData: z.infer<typeof opportunitySchema>,
     userId: string,
@@ -35,7 +48,7 @@ export async function createOrUpdateOpportunity(
         const dataToSave = {
             ...validatedData,
             deadline: Timestamp.fromDate(validatedData.deadline),
-            grades: validatedData.grades.map(Number).sort((a,b) => a - b),
+            grades: sortGrades(validatedData.grades),
             summary: validatedData.description.substring(0, 100) + '...'
         };
 

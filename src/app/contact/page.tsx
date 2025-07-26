@@ -11,7 +11,7 @@ export default function ContactPage() {
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-headline font-bold text-foreground">Get in Touch</h1>
           <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
-            This project was built for fun with the simple goal of helping students in the UAE discover amazing opportunities. We'd love to hear from you!
+            This project was built for fun with the simple goal of helping students in the UAE discover amazing opportunities. I'd love to hear from you!
           </p>
         </div>
 
