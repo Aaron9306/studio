@@ -13,7 +13,7 @@ import { isPast, endOfDay } from 'date-fns';
 
 export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
   const { user, toggleBookmark } = useAuth();
-  const isBookmarked = user?.bookmarkedOpportunities.includes(opportunity.id);
+  const isBookmarked = user?.bookmarkedOpportunities?.includes(opportunity.id);
   const isClosed = isPast(endOfDay(opportunity.deadline.toDate()));
 
   const handleBookmarkClick = (e: React.MouseEvent) => {
