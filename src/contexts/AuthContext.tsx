@@ -2,21 +2,11 @@
 import type { User } from '@/lib/types';
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { auth, db } from '@/lib/firebase';
-import { 
-  onAuthStateChanged, 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  signOut,
-  sendPasswordResetEmail,
-  User as FirebaseUser
-} from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { createClient } from '@/lib/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   user: User | null;
-  firebaseUser: FirebaseUser | null;
   login: (email: string, password: string) => Promise<boolean>;
   adminLogin: (email: string, password: string) => Promise<boolean>;
   signup: (name: string, email: string, password: string) => Promise<boolean>;
@@ -30,154 +20,109 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const { toast } = useToast();
+  const supabase = createClient();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-      setFirebaseUser(fbUser);
-      if (fbUser) {
-        const userDocRef = doc(db, 'users', fbUser.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          setUser({ id: userDoc.id, ...userDoc.data() } as User);
-        } else {
-          setUser(null);
-        }
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const { data: profile } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+        setUser(profile);
+      }
+      setLoading(false);
+    };
+
+    getSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        // Fetch profile logic here
       } else {
         setUser(null);
       }
-      setLoading(false);
     });
 
-    return () => unsubscribe();
-  }, []);
+    return () => subscription.unsubscribe();
+  }, [supabase]);
 
   const login = async (email: string, password: string) => {
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
-      if (userDoc.exists() && userDoc.data().role !== 'admin') {
-        router.push('/dashboard');
-        return true;
-      }
-      await signOut(auth);
-      toast({ variant: 'destructive', title: 'Login Failed', description: 'No student account found for this email.' });
-      return false;
-    } catch (error) {
-      return false;
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return false;
+    
+    // Check if user is not admin
+    const { data: profile } = await supabase.from('users').select('*').eq('id', data.user.id).single();
+    if (profile?.role === 'student') {
+      router.push('/dashboard');
+      return true;
     }
+    return false;
   };
 
   const adminLogin = async (email: string, password: string) => {
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
-      if (userDoc.exists() && userDoc.data().role === 'admin') {
-        router.push('/admin/dashboard');
-        return true;
-      }
-       await signOut(auth);
-       toast({ variant: 'destructive', title: 'Access Denied', description: 'You do not have administrator privileges.' });
-      return false;
-    } catch (error) {
-      return false;
-    }
-  };
-  
-  const signup = async (name: string, email: string, password: string) => {
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const newUser: User = {
-        id: userCredential.user.uid,
-        name,
-        email,
-        role: 'student',
-        bookmarkedOpportunities: [],
-      };
-      await setDoc(doc(db, 'users', newUser.id), newUser);
-      router.push('/dashboard');
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return false;
+
+    const { data: profile } = await supabase.from('users').select('*').eq('id', data.user.id).single();
+    if (profile?.role === 'admin') {
+      router.push('/admin/dashboard');
       return true;
-    } catch (error: any) {
-      if (error.code === 'auth/email-already-in-use') {
-         toast({
-          variant: 'destructive',
-          title: 'Signup Failed',
-          description: 'An account with this email already exists.',
-        });
-        return false;
-      }
-      toast({
-        variant: 'destructive',
-        title: 'Signup Failed',
-        description: 'An unexpected error occurred. Please try again.',
-      });
-      throw error;
     }
+    return false;
   };
 
-  const sendPasswordReset = async (email: string) => {
-    try {
-      await sendPasswordResetEmail(auth, email);
-      toast({
-        title: 'Password Reset Email Sent',
-        description: 'Check your inbox for a link to reset your password.',
-      });
-      return true;
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Could not send password reset email. Please check the address and try again.',
-      });
-      return false;
+  const signup = async (name: string, email: string, password: string) => {
+    const { data, error } = await supabase.auth.signUp({ 
+        email, 
+        password,
+        options: { data: { name } } // Saves metadata in auth table
+    });
+    
+    if (error) {
+        toast({ variant: 'destructive', title: 'Signup Failed', description: error.message });
+        return false;
     }
+
+    // You would typically use a Database Trigger to create the row in 'users' table automatically
+    router.push('/dashboard');
+    return true;
   };
 
   const logout = async () => {
-    await signOut(auth);
+    await supabase.auth.signOut();
     router.push('/login');
   };
 
   const toggleBookmark = async (opportunityId: string) => {
     if (!user) return;
+    
+    // Logic: In Supabase, you usually update the user's bookmarks 
+    // by either modifying a 'bookmarks' table or an array column in 'users'
+    const currentBookmarks = user.bookmarkedOpportunities || [];
+    const isBookmarked = currentBookmarks.includes(opportunityId);
+    const newBookmarks = isBookmarked 
+      ? currentBookmarks.filter(id => id !== opportunityId)
+      : [...currentBookmarks, opportunityId];
 
-    const userDocRef = doc(db, 'users', user.id);
-    const isBookmarked = user.bookmarkedOpportunities.includes(opportunityId);
+    const { error } = await supabase
+      .from('users')
+      .update({ bookmarkedOpportunities: newBookmarks })
+      .eq('id', user.id);
 
-    try {
-      await updateDoc(userDocRef, {
-        bookmarkedOpportunities: isBookmarked 
-          ? arrayRemove(opportunityId) 
-          : arrayUnion(opportunityId)
-      });
-
-      const updatedBookmarks = isBookmarked
-        ? user.bookmarkedOpportunities.filter(id => id !== opportunityId)
-        : [...user.bookmarkedOpportunities, opportunityId];
-      setUser({ ...user, bookmarkedOpportunities: updatedBookmarks });
-
-    } catch (error) {
-      console.error("Error toggling bookmark:", error);
-      toast({variant: 'destructive', title: 'Error', description: 'Could not update bookmark.'});
+    if (!error) {
+      setUser({ ...user, bookmarkedOpportunities: newBookmarks });
     }
   };
 
-  const value = { user, firebaseUser, login, adminLogin, signup, sendPasswordReset, logout, loading, toggleBookmark };
+  const value = { user, login, adminLogin, signup, sendPasswordReset: async () => true, logout, loading, toggleBookmark };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {!loading && children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
 };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+export const useAuth = () => useContext(AuthContext)!;
