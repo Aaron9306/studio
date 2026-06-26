@@ -98,7 +98,8 @@ export function OpportunitiesTable({ opportunities, type }: OpportunitiesTablePr
                     </Link>
                   </TableCell>
                   <TableCell><Badge variant="outline">{opp.type}</Badge></TableCell>
-                  <TableCell>{formatDate(opp.deadline.toDate(), 'dd MMM yyyy')}</TableCell>
+                  {/* Updated date formatting: parse ISO string directly */}
+                  <TableCell>{formatDate(new Date(opp.deadline), 'dd MMM yyyy')}</TableCell>
                   <TableCell className="text-right space-x-2">
                     {type === 'pending' && (
                         <>
