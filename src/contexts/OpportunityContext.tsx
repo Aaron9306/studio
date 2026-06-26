@@ -1,15 +1,7 @@
 'use client';
-import type { Opportunity, OpportunityStatus } from '@/lib/types';
+import type { Opportunity } from '@/lib/types';
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { db } from '@/lib/firebase';
-import { 
-  collection, 
-  onSnapshot, 
-  doc, 
-  query,
-  orderBy,
-  Timestamp
-} from 'firebase/firestore';
+import { createClient } from '@/lib/supabase/client'; // Import your browser client
 
 interface OpportunityContextType {
   opportunities: Opportunity[];
@@ -22,25 +14,41 @@ const OpportunityContext = createContext<OpportunityContextType | undefined>(und
 export const OpportunityProvider = ({ children }: { children: ReactNode }) => {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
+  const supabase = createClient();
 
   useEffect(() => {
-    setLoading(true);
-    const q = query(collection(db, 'opportunities'), orderBy('createdAt', 'desc'));
+    // 1. Initial Fetch
+    const fetchOpportunities = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('opportunities')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const opportunitiesData: Opportunity[] = [];
-      querySnapshot.forEach((doc) => {
-        opportunitiesData.push({ id: doc.id, ...doc.data() } as Opportunity);
-      });
-      setOpportunities(opportunitiesData);
+      if (error) console.error("Error fetching opportunities:", error);
+      else setOpportunities(data as Opportunity[]);
       setLoading(false);
-    }, (error) => {
-        console.error("Error fetching opportunities:", error);
-        setLoading(false);
-    });
+    };
 
-    return () => unsubscribe();
-  }, []);
+    fetchOpportunities();
+
+    // 2. Real-time Subscription
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'opportunities' },
+        (payload) => {
+          // Re-fetch on any database change
+          fetchOpportunities();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [supabase]);
 
   const getOpportunityById = (id: string) => {
     return opportunities.find(opp => opp.id === id);
