@@ -1,4 +1,4 @@
-import { Timestamp } from "firebase/firestore";
+
 
 export type OpportunityType = 'MUN' | 'Internship' | 'Volunteering' | 'Competition' | 'Bootcamp' | 'Hackathon' | 'Workshop';
 export type OpportunityAudience = 'All Nationalities' | 'Emiratis Only';
@@ -6,7 +6,6 @@ export type OpportunityFormat = 'Online' | 'Offline';
 export type OpportunityPrice = 'Free' | 'Paid';
 export type OpportunityStatus = 'pending' | 'approved' | 'rejected';
 export type Emirate = "All Emirates" | "Abu Dhabi" | "Ajman" | "Dubai" | "Fujairah" | "Ras Al Khaimah" | "Sharjah" | "Umm Al Quwain";
-
 
 export interface Opportunity {
   id: string;
@@ -19,14 +18,14 @@ export interface Opportunity {
   price: OpportunityPrice;
   audience: OpportunityAudience;
   format: OpportunityFormat;
-  deadline: Timestamp;
+  deadline: string; 
   emirate: Emirate;
   registrationLink?: string;
   detailsLink?: string;
   imageUrl?: string;
   status: OpportunityStatus;
-  submittedBy: string; // user id
-  createdAt: Timestamp;
+  submittedBy: string;
+  createdAt: string; 
   ageRange?: number[];
 }
 
@@ -35,5 +34,5 @@ export interface User {
   name: string;
   email: string;
   role: 'student' | 'admin';
-  bookmarkedOpportunities: string[]; // array of opportunity ids
+  bookmarkedOpportunities: string[];
 }
