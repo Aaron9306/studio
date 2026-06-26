@@ -1,8 +1,6 @@
 import { User, Opportunity } from './types';
-import { Timestamp } from 'firebase/firestore';
 
-// This file is now deprecated in favor of Firestore,
-// but can be kept for reference or seeding a new database.
+
 
 export const mockUsers: User[] = [
   {
@@ -21,7 +19,6 @@ export const mockUsers: User[] = [
   },
 ];
 
-const toTimestamp = (date: Date) => Timestamp.fromDate(date);
 
 export const mockOpportunities: Opportunity[] = [
   {
@@ -34,12 +31,11 @@ export const mockOpportunities: Opportunity[] = [
     price: 'Free',
     audience: 'All Nationalities',
     format: 'Offline',
-    deadline: toTimestamp(new Date('2024-10-15')),
-    registrationLink: 'https://example.com/hackathon',
-    imageUrl: 'https://placehold.co/600x400.png',
+    deadline: '2024-10-15T00:00:00Z', 
+    emirate: 'Dubai',
     status: 'approved',
     submittedBy: 'admin-1',
-    createdAt: toTimestamp(new Date('2024-07-01')),
+    createdAt: '2024-07-01T00:00:00Z',
   },
   {
     id: 'opp-2',
@@ -51,10 +47,10 @@ export const mockOpportunities: Opportunity[] = [
     price: 'Free',
     audience: 'All Nationalities',
     format: 'Offline',
-    deadline: toTimestamp(new Date('2024-09-30')),
-    imageUrl: 'https://placehold.co/600x400.png',
+    deadline: '2024-09-30T00:00:00Z',
+    emirate: 'Dubai',
     status: 'approved',
     submittedBy: 'admin-1',
-    createdAt: toTimestamp(new Date('2024-07-02')),
+    createdAt: '2024-07-02T00:00:00Z',
   },
 ];
